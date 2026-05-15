@@ -1,0 +1,9 @@
+secpr-dashboard/
+.claude/
+keys/
+*.exe
+*.test
+testdata/
+.env
+.env.*
+*.md

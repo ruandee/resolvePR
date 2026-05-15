@@ -1,0 +1,9 @@
+=== testdata/clean/clean-bcrypt.go ===
+=== testdata/clean/clean-cmd-args.go ===
+=== testdata/clean/clean-env-secret.go ===
+=== testdata/clean/clean-html-escape.go ===
+=== testdata/clean/clean-json-parse.go ===
+=== testdata/clean/clean-path-clean.go ===
+=== testdata/clean/clean-prepared.go ===
+=== testdata/clean/clean-pure-math.go ===
+=== testdata/clean/clean-validation.go ===

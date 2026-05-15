@@ -1,0 +1,13 @@
+node_modules/
+secpr-dashboard/node_modules/
+.env
+.env.local
+.next/
+/tmp
+keys/
+*.pem
+secpr-dashboard/app/oracleJdk-26/
+.claude/worktrees/
+/server
+/server.exe
+test.txt
