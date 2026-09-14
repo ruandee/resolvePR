@@ -12,8 +12,8 @@ func TestParseSingleHunk(t *testing.T) {
 	if want := []int{12, 13, 14}; !reflect.DeepEqual(h.AddedLines, want) {
 		t.Fatalf("AddedLines = %v, want %v", h.AddedLines, want)
 	}
-	// position = 1-based index of the line within the patch, counting the header.
-	want := map[int]int{12: 4, 13: 5, 14: 6}
+	// position = GitHub's: the line just below the first "@@" header is 1.
+	want := map[int]int{12: 3, 13: 4, 14: 5}
 	if !reflect.DeepEqual(h.DiffPositions, want) {
 		t.Fatalf("DiffPositions = %v, want %v", h.DiffPositions, want)
 	}
@@ -43,8 +43,8 @@ func TestParseMultiHunk(t *testing.T) {
 	if want := []int{2, 22, 23}; !reflect.DeepEqual(h.AddedLines, want) {
 		t.Fatalf("AddedLines = %v, want %v", h.AddedLines, want)
 	}
-	// Positions keep counting across hunk headers (GitHub semantics).
-	want := map[int]int{2: 3, 22: 8, 23: 9}
+	// Positions keep counting across later hunk headers (GitHub semantics).
+	want := map[int]int{2: 2, 22: 7, 23: 8}
 	if !reflect.DeepEqual(h.DiffPositions, want) {
 		t.Fatalf("DiffPositions = %v, want %v", h.DiffPositions, want)
 	}
@@ -56,8 +56,8 @@ func TestParseHunkHeaderWithoutCount(t *testing.T) {
 	if want := []int{5}; !reflect.DeepEqual(h.AddedLines, want) {
 		t.Fatalf("AddedLines = %v, want %v", h.AddedLines, want)
 	}
-	if h.DiffPositions[5] != 3 {
-		t.Fatalf("position = %d, want 3", h.DiffPositions[5])
+	if h.DiffPositions[5] != 2 {
+		t.Fatalf("position = %d, want 2", h.DiffPositions[5])
 	}
 }
 

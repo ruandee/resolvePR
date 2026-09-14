@@ -103,17 +103,18 @@ func (g *GitHubSink) Fail(ctx context.Context, _ PRMeta, err error) {
 }
 
 func (g *GitHubSink) Emit(ctx context.Context, res *Result) error {
-	positions := map[string]map[int]int{}
+	// GitHub only anchors review comments to lines that appear in the diff;
+	// the parser's position map doubles as that membership check.
+	inDiff := map[string]map[int]int{}
 	for _, f := range res.Files {
-		positions[f.Filename] = f.Hunk.DiffPositions
+		inDiff[f.Filename] = f.Hunk.DiffPositions
 	}
 	for _, fnd := range res.Findings {
-		pos, ok := positions[fnd.File][fnd.Line]
-		if !ok {
-			g.logf("[resolvepr] no diff position for %s:%d — skipping inline comment", fnd.File, fnd.Line)
+		if _, ok := inDiff[fnd.File][fnd.Line]; !ok {
+			g.logf("[resolvepr] %s:%d is not in the diff — skipping inline comment", fnd.File, fnd.Line)
 			continue
 		}
-		if err := output.PostComment(ctx, g.Token, g.Owner, g.Repo, g.Number, g.HeadSHA, fnd.File, pos, fnd); err != nil {
+		if err := output.PostComment(ctx, g.Token, g.Owner, g.Repo, g.Number, g.HeadSHA, fnd.File, fnd.Line, fnd); err != nil {
 			g.logf("[resolvepr] post comment %s:%d: %v", fnd.File, fnd.Line, err)
 		}
 	}

@@ -22,18 +22,24 @@ type prComment struct {
 	Body     string `json:"body"`
 	CommitID string `json:"commit_id"`
 	Path     string `json:"path"`
-	Position int    `json:"position"`
+	// line + side anchor the comment to a line of the new file directly, which
+	// is what GitHub documents today; the older position-in-diff field needs
+	// error-prone arithmetic over the patch.
+	Line int    `json:"line"`
+	Side string `json:"side"`
 }
 
-// PostComment posts ONE inline review comment with a click-to-apply suggestion block.
-// position = position WITHIN THE DIFF (not the file line). Get it from your diff parser's
-// DiffPositions map: parser.DiffPositions[finding.Line].
-func PostComment(ctx context.Context, token, owner, repo string, prNum int, sha, file string, position int, f llm.Finding) error {
+// PostComment posts ONE inline review comment with a click-to-apply suggestion
+// block, anchored to line (1-based, in the new file at sha). The line must be
+// part of the PR diff — an added or context line — or GitHub rejects it with
+// 422; callers check that with diff.Hunk.DiffPositions before calling.
+func PostComment(ctx context.Context, token, owner, repo string, prNum int, sha, file string, line int, f llm.Finding) error {
 	payload, _ := json.Marshal(prComment{
 		Body:     buildCommentBody(f),
 		CommitID: sha,
 		Path:     file,
-		Position: position,
+		Line:     line,
+		Side:     "RIGHT",
 	})
 
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/pulls/%d/comments", owner, repo, prNum)

@@ -25,19 +25,30 @@ func Parse(patch string) Hunk {
 		return h
 	}
 
+	// GitHub's position: the line just below the FIRST "@@" header is 1, and
+	// the count keeps increasing through every later line, including later
+	// "@@" headers. Lines before the first header (raw git "---"/"+++"
+	// file headers) are not counted at all.
 	var newLine int
 	pos := 0
+	inHunk := false
 	for _, line := range strings.Split(patch, "\n") {
-		pos++
-
 		// Hunk header — reset newLine to start of this hunk
 		if m := hunkRe.FindStringSubmatch(line); m != nil {
+			if inHunk {
+				pos++
+			}
+			inHunk = true
 			n, _ := strconv.Atoi(m[1])
 			newLine = n - 1
 			continue
 		}
+		if !inHunk {
+			continue // file header lines before the first hunk
+		}
+		pos++
 
-		// File header lines (very rare in GitHub patches, but skip safely)
+		// File header lines mid-patch (never in GitHub's per-file patch, but skip safely)
 		if strings.HasPrefix(line, "+++") || strings.HasPrefix(line, "---") {
 			continue
 		}
