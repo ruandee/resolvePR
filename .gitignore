@@ -11,3 +11,8 @@ secpr-dashboard/app/oracleJdk-26/
 /server
 /server.exe
 test.txt
+
+# stray tool worktrees
+.claire/
+# TS incremental build cache
+*.tsbuildinfo
