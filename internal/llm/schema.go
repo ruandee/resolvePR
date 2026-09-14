@@ -45,6 +45,23 @@ func ContentID(cwe, file string, line int) string {
 	return fmt.Sprintf("F-%x", h[:4]) // e.g. "F-3a9cf12b"
 }
 
+// findingProperties is a struct, not a map, so encoding/json preserves the
+// declared field order. The constrained decoder emits keys in schema order,
+// and that order matters: with the alphabetical order a Go map produces
+// (confidence first, why_it_matters last) the response ends on a free-text
+// string and the model sometimes never closes it, spiralling to max_tokens.
+// Ending on `confidence` (a number) terminates cleanly, and it matches the
+// example in the system prompt.
+type findingProperties struct {
+	CWE          map[string]any `json:"cwe"`
+	Severity     map[string]any `json:"severity"`
+	Line         map[string]any `json:"line"`
+	Summary      map[string]any `json:"summary"`
+	WhyItMatters map[string]any `json:"why_it_matters"`
+	FixPatch     map[string]any `json:"fix_patch"`
+	Confidence   map[string]any `json:"confidence"`
+}
+
 // FindingsSchema is the JSON schema the model's response is constrained to
 // (structured outputs). It mirrors the `interface Finding` in the system
 // prompt. Every object sets additionalProperties:false as the API requires.
@@ -64,14 +81,14 @@ func FindingsSchema() map[string]any {
 						"cwe", "severity", "line", "summary",
 						"why_it_matters", "fix_patch", "confidence",
 					},
-					"properties": map[string]any{
-						"cwe":            str,
-						"severity":       map[string]any{"type": "string", "enum": Severities},
-						"line":           map[string]any{"type": "integer"},
-						"summary":        str,
-						"why_it_matters": str,
-						"fix_patch":      str,
-						"confidence":     map[string]any{"type": "number"},
+					"properties": findingProperties{
+						CWE:          str,
+						Severity:     map[string]any{"type": "string", "enum": Severities},
+						Line:         map[string]any{"type": "integer"},
+						Summary:      str,
+						WhyItMatters: str,
+						FixPatch:     str,
+						Confidence:   map[string]any{"type": "number"},
 					},
 				},
 			},

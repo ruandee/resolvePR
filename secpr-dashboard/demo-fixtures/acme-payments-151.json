@@ -1,34 +1,13 @@
 {
   "schema_version": 1,
-  "generated_at": 1789318000,
-  "generator": "placeholder — hand-built from hackathon eval output; replaced by real scanner output",
+  "generated_at": 1789414444,
+  "generator": "secpr 0.1.0-dev · claude-opus-5",
   "pr": {
     "repo": "acme/payments",
     "number": 151,
     "title": "Parameterise user search and read the fraud API key from the environment",
-    "head_sha": "9b7e02c4",
+    "head_sha": "af27f28c7c6f891f382cb36a5b188e3756a79fb8",
     "files": [
-      {
-        "filename": "internal/handlers/search.go",
-        "language": "go",
-        "status": "modified",
-        "patch": "@@ -38,7 +38,7 @@\n }\n \n func searchUsers(db *sql.DB, q string) ([]User, error) {\n-\trows, err := db.Query(\"SELECT * FROM users WHERE name = '\" + q + \"'\")\n+\trows, err := db.Query(\"SELECT * FROM users WHERE name = ?\", q)\n \tif err != nil {\n \t\treturn nil, err\n \t}",
-        "source": "package handlers\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n)\n\n// User is the public projection of an account row.\ntype User struct {\n\tID    int64  `json:\"id\"`\n\tName  string `json:\"name\"`\n\tEmail string `json:\"email\"`\n}\n\n// SearchHandler serves GET /users/search?q=<name>.\ntype SearchHandler struct {\n\tdb *sql.DB\n}\n\nfunc NewSearchHandler(db *sql.DB) *SearchHandler {\n\treturn &SearchHandler{db: db}\n}\n\nfunc (h *SearchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {\n\tq := r.URL.Query().Get(\"q\")\n\tif q == \"\" {\n\t\thttp.Error(w, \"missing q\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tusers, err := searchUsers(h.db, q)\n\tif err != nil {\n\t\thttp.Error(w, \"search failed\", http.StatusInternalServerError)\n\t\treturn\n\t}\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(users)\n}\n\nfunc searchUsers(db *sql.DB, q string) ([]User, error) {\n\trows, err := db.Query(\"SELECT * FROM users WHERE name = ?\", q)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\treturn scanUsers(rows)\n}\n\nfunc scanUsers(rows *sql.Rows) ([]User, error) {\n\tvar out []User\n\tfor rows.Next() {\n\t\tvar u User\n\t\tif err := rows.Scan(&u.ID, &u.Name, &u.Email); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\tout = append(out, u)\n\t}\n\treturn out, rows.Err()\n}\n",
-        "added_lines": [
-          41
-        ],
-        "chunks": [
-          {
-            "function_name": "searchUsers",
-            "kind": "function",
-            "start_line": 40,
-            "end_line": 47,
-            "changed_lines": [
-              41
-            ]
-          }
-        ]
-      },
       {
         "filename": "internal/clients/client.go",
         "language": "go",
@@ -77,27 +56,45 @@
             ]
           },
           {
-            "function_name": "chunk@1-24",
+            "function_name": "chunk@1-23",
             "kind": "window",
             "start_line": 1,
-            "end_line": 24,
+            "end_line": 23,
             "changed_lines": [
               1,
-              2,
               3,
               4,
               5,
               6,
               7,
-              8,
               9,
               10,
               11,
               12,
               13,
               14,
-              15,
-              16
+              15
+            ]
+          }
+        ]
+      },
+      {
+        "filename": "internal/handlers/search.go",
+        "language": "go",
+        "status": "modified",
+        "patch": "@@ -38,7 +38,7 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {\n }\n \n func searchUsers(db *sql.DB, q string) ([]User, error) {\n-\trows, err := db.Query(\"SELECT * FROM users WHERE name = '\" + q + \"'\")\n+\trows, err := db.Query(\"SELECT * FROM users WHERE name = ?\", q)\n \tif err != nil {\n \t\treturn nil, err\n \t}",
+        "source": "package handlers\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n)\n\n// User is the public projection of an account row.\ntype User struct {\n\tID    int64  `json:\"id\"`\n\tName  string `json:\"name\"`\n\tEmail string `json:\"email\"`\n}\n\n// SearchHandler serves GET /users/search?q=<name>.\ntype SearchHandler struct {\n\tdb *sql.DB\n}\n\nfunc NewSearchHandler(db *sql.DB) *SearchHandler {\n\treturn &SearchHandler{db: db}\n}\n\nfunc (h *SearchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {\n\tq := r.URL.Query().Get(\"q\")\n\tif q == \"\" {\n\t\thttp.Error(w, \"missing q\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tusers, err := searchUsers(h.db, q)\n\tif err != nil {\n\t\thttp.Error(w, \"search failed\", http.StatusInternalServerError)\n\t\treturn\n\t}\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(users)\n}\n\nfunc searchUsers(db *sql.DB, q string) ([]User, error) {\n\trows, err := db.Query(\"SELECT * FROM users WHERE name = ?\", q)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\treturn scanUsers(rows)\n}\n\nfunc scanUsers(rows *sql.Rows) ([]User, error) {\n\tvar out []User\n\tfor rows.Next() {\n\t\tvar u User\n\t\tif err := rows.Scan(&u.ID, &u.Name, &u.Email); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\tout = append(out, u)\n\t}\n\treturn out, rows.Err()\n}\n",
+        "added_lines": [
+          41
+        ],
+        "chunks": [
+          {
+            "function_name": "searchUsers",
+            "kind": "function",
+            "start_line": 40,
+            "end_line": 47,
+            "changed_lines": [
+              41
             ]
           }
         ]
@@ -109,6 +106,6 @@
     "files": 2,
     "chunks": 3,
     "llm_calls": 3,
-    "duration_ms": 3900
+    "duration_ms": 6341
   }
 }

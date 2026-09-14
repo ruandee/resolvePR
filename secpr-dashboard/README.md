@@ -39,7 +39,7 @@ npm run validate:fixtures          # fails until the file is also listed in lib/
 ```
 
 Then import it in `lib/fixtures.ts` and add it to the `FIXTURES` array. The schema, the validator's rules and
-the status of the current placeholder fixtures are documented in
+how the checked-in fixtures were produced are documented in
 [`demo-fixtures/README.md`](demo-fixtures/README.md).
 
 ## Layout

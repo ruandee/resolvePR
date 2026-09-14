@@ -17,9 +17,10 @@ npm run validate:fixtures
 Then add the new file to the `FIXTURES` list in `lib/fixtures.ts` (the validator fails until you do) and
 it appears as a card on the demo's first step.
 
-The two fixtures currently checked in are **placeholders**: hand-built from the hackathon eval output in
-`testdata/` and `vuln-results-v3.json`, with `generator` set accordingly. They are internally consistent
-(they pass the validator) but the surrounding code is invented. Replace them with real scanner output.
+The two fixtures checked in are **real scanner output**: each sample PR was staged as a two-commit git
+repository (the vulnerable functions come from `testdata/vulns/`, embedded in small invented Go files)
+and scanned with `secpr scan --local … --fixture-out`. The `generator` field records the binary and
+model that produced them; `findings` are the model's actual responses after validation, untouched.
 
 ## Schema (`schema_version: 1`)
 

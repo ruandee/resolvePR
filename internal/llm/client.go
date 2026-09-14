@@ -20,8 +20,10 @@ import (
 const DefaultModel = "claude-opus-5"
 
 // defaultMaxTokens leaves headroom for adaptive thinking (which counts
-// against max_tokens on current models) plus the findings JSON.
-const defaultMaxTokens = 16000
+// against max_tokens on current models) plus the findings JSON, while
+// bounding the cost of a degenerate response: a well-formed findings list
+// for one function is a few hundred tokens.
+const defaultMaxTokens = 8192
 
 // ErrNoAPIKey is returned by Review when the client has no API key. Callers
 // should check it before starting a scan so the failure is immediate and

