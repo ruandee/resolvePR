@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"strings"
 
-	gh "secpr/internal/github"
+	gh "resolvepr/internal/github"
 )
 
 // ChangedFile is one file touched by a change set.

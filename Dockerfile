@@ -5,16 +5,16 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 # CGO required for go-tree-sitter
-RUN CGO_ENABLED=1 GOOS=linux go build -o /secpr ./cmd/secpr
+RUN CGO_ENABLED=1 GOOS=linux go build -o /resolvepr ./cmd/resolvepr
 
 # ── Runtime stage ─────────────────────────────────────────────────────────────
 # debian:bookworm-slim has glibc — needed for CGO binaries
 FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
-COPY --from=build /secpr /secpr
+COPY --from=build /resolvepr /resolvepr
 # `serve` reads PORT (Cloud Run injects it); `action` ignores it.
 EXPOSE 8080
 # The GitHub Action (action.yml) passes `action`; the self-hosted webhook
 # server runs the image with `serve`.
-ENTRYPOINT ["/secpr"]
+ENTRYPOINT ["/resolvepr"]
 CMD ["serve"]

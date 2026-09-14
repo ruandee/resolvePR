@@ -11,9 +11,9 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"secpr/internal/llm"
-	"secpr/internal/output"
-	"secpr/internal/store"
+	"resolvepr/internal/llm"
+	"resolvepr/internal/output"
+	"resolvepr/internal/store"
 )
 
 // Sink receives a finished scan. Each mode of the binary picks the sinks it
@@ -39,7 +39,7 @@ func Run(ctx context.Context, sc *Scanner, src Source, meta PRMeta, sinks ...Sin
 	for _, s := range sinks {
 		if ls, ok := s.(LifecycleSink); ok {
 			if err := ls.Begin(ctx, meta); err != nil {
-				sc.logf("[secpr] %T begin: %v", s, err)
+				sc.logf("[resolvepr] %T begin: %v", s, err)
 			}
 		}
 	}
@@ -54,7 +54,7 @@ func Run(ctx context.Context, sc *Scanner, src Source, meta PRMeta, sinks ...Sin
 	}
 	for _, s := range sinks {
 		if err := s.Emit(ctx, res); err != nil {
-			sc.logf("[secpr] %T emit: %v", s, err)
+			sc.logf("[resolvepr] %T emit: %v", s, err)
 		}
 	}
 	return res, nil
@@ -98,7 +98,7 @@ func (g *GitHubSink) Fail(ctx context.Context, _ PRMeta, err error) {
 		return
 	}
 	if cerr := output.CompleteCheck(ctx, g.Token, g.Owner, g.Repo, g.checkID, nil); cerr != nil {
-		g.logf("[secpr] complete check after failure: %v", cerr)
+		g.logf("[resolvepr] complete check after failure: %v", cerr)
 	}
 }
 
@@ -110,19 +110,19 @@ func (g *GitHubSink) Emit(ctx context.Context, res *Result) error {
 	for _, fnd := range res.Findings {
 		pos, ok := positions[fnd.File][fnd.Line]
 		if !ok {
-			g.logf("[secpr] no diff position for %s:%d — skipping inline comment", fnd.File, fnd.Line)
+			g.logf("[resolvepr] no diff position for %s:%d — skipping inline comment", fnd.File, fnd.Line)
 			continue
 		}
 		if err := output.PostComment(ctx, g.Token, g.Owner, g.Repo, g.Number, g.HeadSHA, fnd.File, pos, fnd); err != nil {
-			g.logf("[secpr] post comment %s:%d: %v", fnd.File, fnd.Line, err)
+			g.logf("[resolvepr] post comment %s:%d: %v", fnd.File, fnd.Line, err)
 		}
 	}
 	if err := output.PostSummary(ctx, g.Token, g.Owner, g.Repo, g.Number, res.Findings); err != nil {
-		g.logf("[secpr] post summary: %v", err)
+		g.logf("[resolvepr] post summary: %v", err)
 	}
 	if g.checkID != 0 {
 		if err := output.CompleteCheck(ctx, g.Token, g.Owner, g.Repo, g.checkID, res.Findings); err != nil {
-			g.logf("[secpr] complete check: %v", err)
+			g.logf("[resolvepr] complete check: %v", err)
 		}
 	}
 	return nil
@@ -235,7 +235,7 @@ func PrintResult(w io.Writer, res *Result, showBodies bool) {
 	if res.Meta.Title != "" {
 		title += " — " + res.Meta.Title
 	}
-	fmt.Fprintf(w, "SecPR scan: %s\n", title)
+	fmt.Fprintf(w, "ResolvePR scan: %s\n", title)
 	if res.DryRun {
 		fmt.Fprintln(w, "(dry run — nothing was sent to the model)")
 	}

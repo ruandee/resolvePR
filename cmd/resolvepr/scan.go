@@ -12,26 +12,26 @@ import (
 
 	"github.com/joho/godotenv"
 
-	gh "secpr/internal/github"
-	"secpr/internal/llm"
-	"secpr/internal/scan"
+	gh "resolvepr/internal/github"
+	"resolvepr/internal/llm"
+	"resolvepr/internal/scan"
 )
 
 const scanUsage = `Usage:
-  secpr scan --repo OWNER/NAME --pr N [--token T] [--post]
-  secpr scan --local --base REV [--head REV] [--dir PATH] [--repo OWNER/NAME] [--pr N] [--title T]
+  resolvepr scan --repo OWNER/NAME --pr N [--token T] [--post]
+  resolvepr scan --local --base REV [--head REV] [--dir PATH] [--repo OWNER/NAME] [--pr N] [--title T]
 
 Common flags:
   --dry-run           chunk only; print what would be sent, call no model
   --json              print the fixture JSON instead of a human report
   --fixture-out PATH  also write the fixture JSON to PATH (for the dashboard demo)
   --fail-on LEVEL     exit 1 if any finding is >= LEVEL (critical|high|medium|low|none; default none)
-  --api-key, --model  see "secpr -h"
+  --api-key, --model  see "resolvepr -h"
 
 Examples:
-  secpr scan --repo acme/api --pr 142
-  secpr scan --local --base main --dry-run
-  secpr scan --local --base HEAD~1 --fixture-out demo.json
+  resolvepr scan --repo acme/api --pr 142
+  resolvepr scan --local --base main --dry-run
+  resolvepr scan --local --base HEAD~1 --fixture-out demo.json
 
 `
 
@@ -150,7 +150,7 @@ func runScan(args []string) error {
 		fmt.Fprintf(os.Stderr, "fixture written to %s\n", *fixtureOut)
 	}
 	if scan.MeetsThreshold(res.Findings, threshold) {
-		fmt.Fprintf(os.Stderr, "secpr: findings at or above %s severity (--fail-on)\n", strings.ToUpper(threshold))
+		fmt.Fprintf(os.Stderr, "resolvepr: findings at or above %s severity (--fail-on)\n", strings.ToUpper(threshold))
 		return exitCode(1)
 	}
 	return nil

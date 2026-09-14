@@ -13,7 +13,7 @@ import (
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
 
-	"secpr/internal/ast"
+	"resolvepr/internal/ast"
 )
 
 // DefaultModel is used when no model is configured.

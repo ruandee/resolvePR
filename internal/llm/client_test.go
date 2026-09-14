@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"secpr/internal/ast"
+	"resolvepr/internal/ast"
 )
 
 // fakeAnthropic is an httptest.Server that speaks just enough of the

@@ -3,7 +3,7 @@ package store
 import (
 	"testing"
 
-	"secpr/internal/llm"
+	"resolvepr/internal/llm"
 )
 
 func finding(id, repo, sev, status string) llm.Finding {

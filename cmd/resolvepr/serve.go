@@ -16,15 +16,15 @@ import (
 
 	"github.com/joho/godotenv"
 
-	gh "secpr/internal/github"
-	"secpr/internal/llm"
-	"secpr/internal/scan"
-	"secpr/internal/store"
-	"secpr/internal/webhook"
+	gh "resolvepr/internal/github"
+	"resolvepr/internal/llm"
+	"resolvepr/internal/scan"
+	"resolvepr/internal/store"
+	"resolvepr/internal/webhook"
 )
 
 const serveUsage = `Usage:
-  secpr serve [--port 8080] [--api-key K] [--model M]
+  resolvepr serve [--port 8080] [--api-key K] [--model M]
 
 Self-hosted GitHub App webhook server. Environment:
   WEBHOOK_SECRET           GitHub App webhook secret (HMAC)
@@ -141,7 +141,7 @@ func runServe(args []string) error {
 	p := firstNonEmpty(*port, os.Getenv("PORT"), "8080")
 	srv := &http.Server{Addr: ":" + p, Handler: corsMiddleware(mux)}
 	go func() {
-		log.Printf("SecPR %s listening on :%s (model %s)", version, p, client.ModelName())
+		log.Printf("ResolvePR %s listening on :%s (model %s)", version, p, client.ModelName())
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %v", err)
 		}
@@ -307,11 +307,11 @@ func (s *server) processPR(evt webhookEvent) {
 		Title:   evt.PullRequest.Title,
 		HeadSHA: evt.PullRequest.Head.SHA,
 	}
-	log.Printf("[secpr] processing %s#%d sha=%s", meta.Repo, meta.Number, shortSHA(meta.HeadSHA))
+	log.Printf("[resolvepr] processing %s#%d sha=%s", meta.Repo, meta.Number, shortSHA(meta.HeadSHA))
 
 	// Skip if this exact commit was already successfully scanned.
 	if exists, err := s.db.HasCompleteScan(meta.Repo, meta.Number, meta.HeadSHA); err == nil && exists {
-		log.Printf("[secpr] skip duplicate scan %s#%d sha=%s", meta.Repo, meta.Number, shortSHA(meta.HeadSHA))
+		log.Printf("[resolvepr] skip duplicate scan %s#%d sha=%s", meta.Repo, meta.Number, shortSHA(meta.HeadSHA))
 		return
 	}
 
@@ -319,7 +319,7 @@ func (s *server) processPR(evt webhookEvent) {
 
 	token, err := s.gh.InstallationToken(ctx, evt.Installation.ID)
 	if err != nil {
-		log.Printf("[secpr] install token: %v", err)
+		log.Printf("[resolvepr] install token: %v", err)
 		_ = storeSink.Begin(ctx, meta)
 		storeSink.Fail(ctx, meta, fmt.Errorf("install token: %w", err))
 		return
@@ -332,8 +332,8 @@ func (s *server) processPR(evt webhookEvent) {
 	}
 	res, err := scan.Run(ctx, s.scanner, src, meta, sinks...)
 	if err != nil {
-		log.Printf("[secpr] scan %s#%d failed: %v", meta.Repo, meta.Number, err)
+		log.Printf("[resolvepr] scan %s#%d failed: %v", meta.Repo, meta.Number, err)
 		return
 	}
-	log.Printf("[secpr] done %s#%d — %d finding(s)", meta.Repo, meta.Number, len(res.Findings))
+	log.Printf("[resolvepr] done %s#%d — %d finding(s)", meta.Repo, meta.Number, len(res.Findings))
 }

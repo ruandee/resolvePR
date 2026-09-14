@@ -7,7 +7,7 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib" // registers "pgx" driver
-	"secpr/internal/llm"
+	"resolvepr/internal/llm"
 )
 
 const schema = `

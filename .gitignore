@@ -1,15 +1,15 @@
 node_modules/
-secpr-dashboard/node_modules/
+resolvepr-dashboard/node_modules/
 .env
 .env.local
 .next/
 /tmp
 keys/
 *.pem
-secpr-dashboard/app/oracleJdk-26/
+resolvepr-dashboard/app/oracleJdk-26/
 .claude/worktrees/
-/secpr
-/secpr.exe
+/resolvepr
+/resolvepr.exe
 test.txt
 
 # stray tool worktrees

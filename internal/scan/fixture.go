@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 	"io"
 
-	"secpr/internal/llm"
+	"resolvepr/internal/llm"
 )
 
 // FixtureSchemaVersion is bumped when the fixture shape changes.
 const FixtureSchemaVersion = 1
 
-// Fixture is the JSON document `secpr scan --fixture-out` writes and the
+// Fixture is the JSON document `resolvepr scan --fixture-out` writes and the
 // dashboard's /demo page replays. This is a shared contract — do not rename
 // or retype fields.
 type Fixture struct {
 	SchemaVersion int           `json:"schema_version"`
 	GeneratedAt   int64         `json:"generated_at"` // unix seconds
-	Generator     string        `json:"generator"`    // free text, e.g. "secpr 0.1.0 · claude-opus-5"
+	Generator     string        `json:"generator"`    // free text, e.g. "resolvepr 0.1.0 · claude-opus-5"
 	PR            FixturePR     `json:"pr"`
 	Findings      []llm.Finding `json:"findings"`
 	Stats         *Stats        `json:"stats,omitempty"`

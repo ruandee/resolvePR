@@ -1,4 +1,4 @@
-// Package scan is the SecPR pipeline: changed files → language detection →
+// Package scan is the ResolvePR pipeline: changed files → language detection →
 // diff parsing → AST chunking → LLM review → absolute line mapping →
 // validated findings. It knows nothing about webhooks, HTTP servers, or
 // process-wide state; every mode of the binary (serve, scan, action) drives
@@ -12,9 +12,9 @@ import (
 	"log"
 	"time"
 
-	"secpr/internal/ast"
-	"secpr/internal/diff"
-	"secpr/internal/llm"
+	"resolvepr/internal/ast"
+	"resolvepr/internal/diff"
+	"resolvepr/internal/llm"
 )
 
 // PRMeta identifies the change set being scanned.
@@ -135,7 +135,7 @@ func (s *Scanner) Scan(ctx context.Context, src Source, meta PRMeta) (*Result, e
 			fr.Skipped = "no added lines"
 		}
 		if fr.Skipped != "" {
-			s.logf("[secpr] skip %s: %s", f.Filename, fr.Skipped)
+			s.logf("[resolvepr] skip %s: %s", f.Filename, fr.Skipped)
 			res.Files = append(res.Files, fr)
 			continue
 		}
@@ -143,7 +143,7 @@ func (s *Scanner) Scan(ctx context.Context, src Source, meta PRMeta) (*Result, e
 		if fr.Source == nil {
 			content, err := src.Content(ctx, f.Filename)
 			if err != nil {
-				s.logf("[secpr] file content %s: %v", f.Filename, err)
+				s.logf("[resolvepr] file content %s: %v", f.Filename, err)
 				res.Errors = append(res.Errors, fmt.Errorf("%s: %w", f.Filename, err))
 				fr.Skipped = "content unavailable"
 				res.Files = append(res.Files, fr)
@@ -161,7 +161,7 @@ func (s *Scanner) Scan(ctx context.Context, src Source, meta PRMeta) (*Result, e
 				res.Stats.LLMCalls++
 				findings, err := s.Reviewer.Review(ctx, ch)
 				if err != nil {
-					s.logf("[secpr] llm review %s %s: %v", f.Filename, ch.FunctionName, err)
+					s.logf("[resolvepr] llm review %s %s: %v", f.Filename, ch.FunctionName, err)
 					res.Errors = append(res.Errors, fmt.Errorf("%s %s: %w", f.Filename, ch.FunctionName, err))
 					if ctx.Err() != nil {
 						return res, ctx.Err()

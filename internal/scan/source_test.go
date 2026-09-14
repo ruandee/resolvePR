@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"secpr/internal/diff"
+	"resolvepr/internal/diff"
 )
 
 func TestStripDiffHeader(t *testing.T) {

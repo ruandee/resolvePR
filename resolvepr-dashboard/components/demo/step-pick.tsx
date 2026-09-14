@@ -16,7 +16,7 @@ interface Props {
 export function StepPick({ fixtures, selected, onPick }: Props) {
   return (
     <section aria-labelledby="pick-title">
-      <StepIntro id="pick-title" title="Pick a pull request" body="Each card is a recorded scan of a real pull request. Choose one to step through what SecPR did with it." />
+      <StepIntro id="pick-title" title="Pick a pull request" body="Each card is a recorded scan of a real pull request. Choose one to step through what ResolvePR did with it." />
       <ul className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
         {fixtures.map((fx, i) => {
           const active = selected === i

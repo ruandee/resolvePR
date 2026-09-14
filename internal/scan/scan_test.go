@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"secpr/internal/ast"
-	"secpr/internal/llm"
-	"secpr/internal/store"
+	"resolvepr/internal/ast"
+	"resolvepr/internal/llm"
+	"resolvepr/internal/store"
 )
 
 // ── fakes ────────────────────────────────────────────────────────────────────
@@ -164,7 +164,7 @@ func TestFixtureMatchesContract(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	if err := WriteFixture(&buf, ToFixture(res, "secpr test · fake", 1757800001)); err != nil {
+	if err := WriteFixture(&buf, ToFixture(res, "resolvepr test · fake", 1757800001)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -175,7 +175,7 @@ func TestFixtureMatchesContract(t *testing.T) {
 		t.Fatalf("fixture is not JSON: %v\n%s", err, buf.String())
 	}
 
-	if doc["schema_version"] != float64(1) || doc["generated_at"] != float64(1757800001) || doc["generator"] != "secpr test · fake" {
+	if doc["schema_version"] != float64(1) || doc["generated_at"] != float64(1757800001) || doc["generator"] != "resolvepr test · fake" {
 		t.Errorf("header = %v %v %v", doc["schema_version"], doc["generated_at"], doc["generator"])
 	}
 

@@ -1,6 +1,6 @@
 # OPTIONAL — self-hosted webhook mode only.
 #
-# This deploys `secpr serve` (the GitHub App webhook server) to Google Cloud
+# This deploys `resolvepr serve` (the GitHub App webhook server) to Google Cloud
 # Run. It is NOT needed for the GitHub Action (see README → Install), which
 # is the zero-infrastructure path. It requires the GCP_* secrets below plus
 # the Secret Manager entries referenced in --set-secrets, so it is triggered
@@ -37,14 +37,14 @@ jobs:
 
       - name: Build and push
         run: |
-          IMAGE="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/secpr-api/secpr-api:${{ github.sha }}"
+          IMAGE="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resolvepr-api/resolvepr-api:${{ github.sha }}"
           docker build -t "$IMAGE" .
           docker push "$IMAGE"
 
       - name: Deploy
         run: |
-          gcloud run deploy secpr-api \
-            --image "${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/secpr-api/secpr-api:${{ github.sha }}" \
+          gcloud run deploy resolvepr-api \
+            --image "${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resolvepr-api/resolvepr-api:${{ github.sha }}" \
             --region "${{ secrets.GCP_REGION }}" \
             --platform managed \
             --allow-unauthenticated \

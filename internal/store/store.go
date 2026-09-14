@@ -2,9 +2,9 @@
 // Use New(dsn) for PostgreSQL or NewMemory() for a local in-process fallback.
 package store
 
-import "secpr/internal/llm"
+import "resolvepr/internal/llm"
 
-// PRRecord tracks a pull request that SecPR has scanned.
+// PRRecord tracks a pull request that ResolvePR has scanned.
 type PRRecord struct {
 	Owner         string `json:"owner"`
 	Repo          string `json:"repo"`

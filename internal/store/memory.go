@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"sync"
 
-	"secpr/internal/llm"
+	"resolvepr/internal/llm"
 )
 
 // prKey builds the dedupe key for a PR scan record. The PR number must be

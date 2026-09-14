@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generated_at": 1789414444,
-  "generator": "secpr 0.1.0-dev · claude-opus-5",
+  "generator": "resolvepr 0.1.0-dev · claude-opus-5",
   "pr": {
     "repo": "acme/payments",
     "number": 151,

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     default: `${SITE_NAME} — AI security review for pull requests`,
     template: `%s · ${SITE_NAME}`,
   },
-  description: `${SITE_TAGLINE} SecPR uses tree-sitter to extract only the functions a PR touched and sends those to Claude, then posts inline suggestions and a check run.`,
+  description: `${SITE_TAGLINE} ResolvePR uses tree-sitter to extract only the functions a PR touched and sends those to Claude, then posts inline suggestions and a check run.`,
 }
 
 export const viewport: Viewport = {

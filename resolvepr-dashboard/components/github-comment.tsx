@@ -29,7 +29,7 @@ const GH = {
 
 const CODE: CSSProperties = { fontFamily: TOKENS.fontMono, fontSize: 12, lineHeight: '20px', whiteSpace: 'pre', padding: '0 10px' }
 
-/** Mock of the inline review comment SecPR posts (body from internal/output/comments.go). */
+/** Mock of the inline review comment ResolvePR posts (body from internal/output/comments.go). */
 export function GithubComment({ finding, before, compact = false, style }: Props) {
   const fixLines = finding.fix_patch.split('\n')
   return (
@@ -87,7 +87,7 @@ export function GithubComment({ finding, before, compact = false, style }: Props
           </div>
         </div>
 
-        <p style={{ margin: 0, fontSize: 12, color: GH.muted, fontStyle: 'italic' }}>SecPR · confidence {confidencePct(finding)}%</p>
+        <p style={{ margin: 0, fontSize: 12, color: GH.muted, fontStyle: 'italic' }}>ResolvePR · confidence {confidencePct(finding)}%</p>
       </div>
     </article>
   )

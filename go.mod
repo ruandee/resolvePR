@@ -1,4 +1,4 @@
-module secpr
+module resolvepr
 
 go 1.26.3
 

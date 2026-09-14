@@ -3,7 +3,7 @@ package llm
 import (
 	"log"
 
-	"secpr/internal/ast"
+	"resolvepr/internal/ast"
 )
 
 var validSev = map[string]bool{"CRITICAL": true, "HIGH": true, "MEDIUM": true, "LOW": true}

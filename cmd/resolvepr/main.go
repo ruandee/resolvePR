@@ -1,9 +1,9 @@
-// Command secpr is the SecPR binary: AI security review for pull requests.
+// Command resolvepr is the ResolvePR binary: AI security review for pull requests.
 //
-//	secpr scan    review a GitHub PR or a local git diff from the command line
-//	secpr action  run inside GitHub Actions (reads the event, posts comments)
-//	secpr serve   long-running GitHub App webhook server (self-hosted)
-//	secpr version print the version
+//	resolvepr scan    review a GitHub PR or a local git diff from the command line
+//	resolvepr action  run inside GitHub Actions (reads the event, posts comments)
+//	resolvepr serve   long-running GitHub App webhook server (self-hosted)
+//	resolvepr version print the version
 package main
 
 import (
@@ -14,10 +14,10 @@ import (
 // version is overridden at build time: -ldflags "-X main.version=1.2.3".
 var version = "0.1.0-dev"
 
-const usage = `SecPR — AI security review for pull requests
+const usage = `ResolvePR — AI security review for pull requests
 
 Usage:
-  secpr <command> [flags]
+  resolvepr <command> [flags]
 
 Commands:
   scan      Review a GitHub PR (--repo/--pr) or a local diff (--local --base)
@@ -25,11 +25,11 @@ Commands:
   serve     Run the GitHub App webhook server (self-hosted mode)
   version   Print the version
 
-Run "secpr <command> -h" for the flags of each command.
+Run "resolvepr <command> -h" for the flags of each command.
 
 Environment:
   ANTHROPIC_API_KEY   Anthropic API key (or --api-key)
-  SECPR_MODEL         model override (or --model); default claude-opus-5
+  RESOLVEPR_MODEL         model override (or --model); default claude-opus-5
   GITHUB_TOKEN        GitHub token for scan --repo/--pr and action mode
 `
 
@@ -47,11 +47,11 @@ func main() {
 	case "serve":
 		err = runServe(os.Args[2:])
 	case "version", "--version", "-v":
-		fmt.Printf("secpr %s\n", version)
+		fmt.Printf("resolvepr %s\n", version)
 	case "help", "--help", "-h":
 		fmt.Print(usage)
 	default:
-		fmt.Fprintf(os.Stderr, "secpr: unknown command %q\n\n%s", os.Args[1], usage)
+		fmt.Fprintf(os.Stderr, "resolvepr: unknown command %q\n\n%s", os.Args[1], usage)
 		os.Exit(2)
 	}
 	if err != nil {
@@ -59,7 +59,7 @@ func main() {
 		if asExit(err, &ec) {
 			os.Exit(int(ec))
 		}
-		fmt.Fprintf(os.Stderr, "secpr: %v\n", err)
+		fmt.Fprintf(os.Stderr, "resolvepr: %v\n", err)
 		os.Exit(1)
 	}
 }

@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"secpr/internal/llm"
-	"secpr/internal/scan"
+	"resolvepr/internal/llm"
+	"resolvepr/internal/scan"
 )
 
 // llmFlags are shared by every command that talks to Claude.
@@ -18,7 +18,7 @@ type llmFlags struct {
 
 func (f *llmFlags) register(fs *flag.FlagSet) {
 	fs.StringVar(&f.apiKey, "api-key", "", "Anthropic API key (default: $ANTHROPIC_API_KEY)")
-	fs.StringVar(&f.model, "model", "", "Claude model (default: $SECPR_MODEL, then "+llm.DefaultModel+")")
+	fs.StringVar(&f.model, "model", "", "Claude model (default: $RESOLVEPR_MODEL, then "+llm.DefaultModel+")")
 }
 
 // client builds the single llm.Client for the process. Resolution order:
@@ -26,7 +26,7 @@ func (f *llmFlags) register(fs *flag.FlagSet) {
 // whether that is fatal (it is not for --dry-run).
 func (f *llmFlags) client(extraKeyEnv, extraModelEnv string) *llm.Client {
 	key := firstNonEmpty(f.apiKey, os.Getenv(extraKeyEnv), os.Getenv("ANTHROPIC_API_KEY"))
-	model := firstNonEmpty(f.model, os.Getenv(extraModelEnv), os.Getenv("SECPR_MODEL"), llm.DefaultModel)
+	model := firstNonEmpty(f.model, os.Getenv(extraModelEnv), os.Getenv("RESOLVEPR_MODEL"), llm.DefaultModel)
 	return &llm.Client{APIKey: key, Model: model}
 }
 
@@ -41,7 +41,7 @@ func firstNonEmpty(xs ...string) string {
 
 // generator is the free-text label written into fixtures.
 func generator(c *llm.Client) string {
-	return fmt.Sprintf("secpr %s · %s", version, c.ModelName())
+	return fmt.Sprintf("resolvepr %s · %s", version, c.ModelName())
 }
 
 // checkFailOn validates a --fail-on value.

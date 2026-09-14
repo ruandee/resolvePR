@@ -1,6 +1,6 @@
-name: SecPR
+name: ResolvePR
 description: AI security review of pull requests — inline comments, a summary, and a check run, powered by Claude.
-author: SecPR
+author: ResolvePR
 
 branding:
   icon: shield

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generated_at": 1757800000,
-  "generator": "secpr 0.1.0 · example (fake reviewer)",
+  "generator": "resolvepr 0.1.0 · example (fake reviewer)",
   "pr": {
     "repo": "acme/api",
     "number": 142,

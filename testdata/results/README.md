@@ -41,7 +41,7 @@ Do not edit the prompt wording without re-running both fixture sets.
 When the reviewer moved from the hackathon model (`claude-sonnet-4-6`,
 `temperature: 0`, free-form JSON) to `claude-opus-5` with structured
 outputs, both sets were re-run unchanged through the shipped binary
-(`secpr scan --local --fixture-out`; each set staged as one PR whose base
+(`resolvepr scan --local --fixture-out`; each set staged as one PR whose base
 holds only the `package` line, so every file yields exactly one function
 chunk).
 

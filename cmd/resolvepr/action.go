@@ -9,19 +9,19 @@ import (
 	"strings"
 	"time"
 
-	"secpr/internal/llm"
-	"secpr/internal/output"
-	"secpr/internal/scan"
+	"resolvepr/internal/llm"
+	"resolvepr/internal/output"
+	"resolvepr/internal/scan"
 )
 
 const actionUsage = `Usage:
-  secpr action [--fail-on LEVEL] [--api-key K] [--model M]
+  resolvepr action [--fail-on LEVEL] [--api-key K] [--model M]
 
 Runs inside GitHub Actions. Reads:
   GITHUB_EVENT_PATH        pull_request event payload (number, head sha, repo)
   INPUT_GITHUB_TOKEN       or GITHUB_TOKEN — token for comments and the check run
   INPUT_ANTHROPIC_API_KEY  or ANTHROPIC_API_KEY
-  INPUT_MODEL              or SECPR_MODEL
+  INPUT_MODEL              or RESOLVEPR_MODEL
   INPUT_FAIL_ON            default "high"
   GITHUB_STEP_SUMMARY      if set, the summary table is appended to the job summary
 
@@ -64,7 +64,7 @@ func runAction(args []string) error {
 
 	eventPath := os.Getenv("GITHUB_EVENT_PATH")
 	if eventPath == "" {
-		return fmt.Errorf("GITHUB_EVENT_PATH is not set — `secpr action` must run inside GitHub Actions on a pull_request event")
+		return fmt.Errorf("GITHUB_EVENT_PATH is not set — `resolvepr action` must run inside GitHub Actions on a pull_request event")
 	}
 	raw, err := os.ReadFile(eventPath)
 	if err != nil {
@@ -117,7 +117,7 @@ func runAction(args []string) error {
 	}
 	sinks = append(sinks, &scan.StdoutSink{Generator: generator(client)})
 
-	fmt.Printf("SecPR %s reviewing %s#%d (%s) with %s\n", version, meta.Repo, number, shortSHA(meta.HeadSHA), client.ModelName())
+	fmt.Printf("ResolvePR %s reviewing %s#%d (%s) with %s\n", version, meta.Repo, number, shortSHA(meta.HeadSHA), client.ModelName())
 	res, err := scan.Run(ctx, sc, src, meta, sinks...)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "::error::%v\n", err)
@@ -138,7 +138,7 @@ func runAction(args []string) error {
 	}
 
 	if scan.MeetsThreshold(res.Findings, threshold) {
-		fmt.Fprintf(os.Stderr, "::error::SecPR found findings at or above %s severity (fail_on)\n", strings.ToUpper(threshold))
+		fmt.Fprintf(os.Stderr, "::error::ResolvePR found findings at or above %s severity (fail_on)\n", strings.ToUpper(threshold))
 		return exitCode(1)
 	}
 	return nil

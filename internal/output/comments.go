@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"secpr/internal/llm"
+	"resolvepr/internal/llm"
 )
 
 var sevEmoji = map[string]string{
@@ -83,7 +83,7 @@ func buildCommentBody(f llm.Finding) string {
 		emoji = "⚪"
 	}
 	return fmt.Sprintf(
-		"%s **%s** · %s\n\n%s\n\n**Why it matters:** %s\n\n"+"```suggestion\n%s\n```"+"\n\n_SecPR · confidence %.0f%%_",
+		"%s **%s** · %s\n\n%s\n\n**Why it matters:** %s\n\n"+"```suggestion\n%s\n```"+"\n\n_ResolvePR · confidence %.0f%%_",
 		emoji, f.Severity, f.CWE, f.Summary, f.WhyItMatters, f.FixPatch, f.Confidence*100,
 	)
 }

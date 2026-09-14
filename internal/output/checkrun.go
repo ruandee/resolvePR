@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"secpr/internal/llm"
+	"resolvepr/internal/llm"
 )
 
 type checkRunCreate struct {
@@ -36,7 +36,7 @@ type checkRunOutput struct {
 // Returns the Check Run ID — keep it, you need it to complete the run later.
 func CreateCheck(ctx context.Context, token, owner, repo, sha string) (int64, error) {
 	body, _ := json.Marshal(checkRunCreate{
-		Name:    "SecPR",
+		Name:    "ResolvePR",
 		HeadSHA: sha,
 		Status:  "in_progress",
 	})
@@ -76,9 +76,9 @@ func CompleteCheck(ctx context.Context, token, owner, repo string, checkID int64
 		}
 	}
 
-	title := fmt.Sprintf("SecPR found %d issues", len(findings))
+	title := fmt.Sprintf("ResolvePR found %d issues", len(findings))
 	if len(findings) == 0 {
-		title = "SecPR — no issues found"
+		title = "ResolvePR — no issues found"
 		conclusion = "success"
 	}
 
@@ -117,7 +117,7 @@ func buildSummary(findings []llm.Finding) string {
 // comment, the check run output, and the Actions job summary.
 func BuildSummary(findings []llm.Finding) string {
 	if len(findings) == 0 {
-		return "All scanned chunks clean. SecPR found no security issues."
+		return "All scanned chunks clean. ResolvePR found no security issues."
 	}
 
 	bySev := map[string]int{}
@@ -125,7 +125,7 @@ func BuildSummary(findings []llm.Finding) string {
 		bySev[f.Severity]++
 	}
 
-	return fmt.Sprintf(`## SecPR found %d issues
+	return fmt.Sprintf(`## ResolvePR found %d issues
 
 | Severity | Count |
 |---|---|

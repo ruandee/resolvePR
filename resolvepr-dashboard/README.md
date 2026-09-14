@@ -1,8 +1,8 @@
-# SecPR site + demo
+# ResolvePR site + demo
 
-The public face of SecPR: a two-page Next.js 16 site.
+The public face of ResolvePR: a two-page Next.js 16 site.
 
-- `/` — landing page: what SecPR is, how the AST-chunked review works, what the pull-request author gets,
+- `/` — landing page: what ResolvePR is, how the AST-chunked review works, what the pull-request author gets,
   and the one-file GitHub Actions install.
 - `/demo` — an interactive **replay** of a recorded scan: the diff → the chunks tree-sitter extracted →
   the per-chunk Claude review → a results dashboard and a mock of the GitHub PR view with inline comments
@@ -32,9 +32,9 @@ Each fixture is one scanned pull request. To add or regenerate one:
 
 ```bash
 # from the repository root, using the Go scanner
-secpr scan --repo owner/name --pr 142 --fixture-out secpr-dashboard/demo-fixtures/owner-name-142.json
+resolvepr scan --repo owner/name --pr 142 --fixture-out resolvepr-dashboard/demo-fixtures/owner-name-142.json
 
-cd secpr-dashboard
+cd resolvepr-dashboard
 npm run validate:fixtures          # fails until the file is also listed in lib/fixtures.ts
 ```
 
@@ -53,12 +53,12 @@ demo-fixtures/       scan fixtures (JSON) + schema docs
 scripts/             validate-fixtures.mjs
 ```
 
-`lib/site.ts` holds the repository URL and the action reference (`OWNER/secpr@v1`) — edit it there when the
+`lib/site.ts` holds the repository URL and the action reference (`ruandee/resolvepr@v1`) — edit it there when the
 repo is renamed. `lib/tokens.ts` and `app/globals.css` hold the design tokens.
 
 ## Deploy to Vercel
 
-1. Import the repository and set **Root Directory** to `secpr-dashboard`.
+1. Import the repository and set **Root Directory** to `resolvepr-dashboard`.
 2. Framework preset: Next.js. Build command `npm run build`, output handled by Next.
 3. **No environment variables are required.** Do not add any.
 

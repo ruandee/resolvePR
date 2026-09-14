@@ -3,7 +3,7 @@ package llm
 import (
 	"testing"
 
-	"secpr/internal/ast"
+	"resolvepr/internal/ast"
 )
 
 func good(line int) Finding {

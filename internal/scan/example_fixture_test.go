@@ -6,21 +6,21 @@ import (
 	"strings"
 	"testing"
 
-	"secpr/internal/llm"
+	"resolvepr/internal/llm"
 )
 
 // TestWriteExampleFixture regenerates testdata/fixtures/example-scan.json,
 // the checked-in sample of the fixture contract. It is a no-op unless
-// SECPR_WRITE_FIXTURE names the output path:
+// RESOLVEPR_WRITE_FIXTURE names the output path:
 //
-//	SECPR_WRITE_FIXTURE=testdata/fixtures/example-scan.json go test ./internal/scan -run TestWriteExampleFixture
+//	RESOLVEPR_WRITE_FIXTURE=testdata/fixtures/example-scan.json go test ./internal/scan -run TestWriteExampleFixture
 //
 // (relative to the package directory, so from the repo root use
 // ../../testdata/fixtures/example-scan.json).
 func TestWriteExampleFixture(t *testing.T) {
-	path := os.Getenv("SECPR_WRITE_FIXTURE")
+	path := os.Getenv("RESOLVEPR_WRITE_FIXTURE")
 	if path == "" {
-		t.Skip("set SECPR_WRITE_FIXTURE=<path> to regenerate the example fixture")
+		t.Skip("set RESOLVEPR_WRITE_FIXTURE=<path> to regenerate the example fixture")
 	}
 
 	const handlerSrc = `package handlers
@@ -122,7 +122,7 @@ export async function search(q: string) {
 		t.Fatal(err)
 	}
 	defer f.Close()
-	if err := WriteFixture(f, ToFixture(res, "secpr 0.1.0 · example (fake reviewer)", 1757800000)); err != nil {
+	if err := WriteFixture(f, ToFixture(res, "resolvepr 0.1.0 · example (fake reviewer)", 1757800000)); err != nil {
 		t.Fatal(err)
 	}
 	t.Logf("wrote %s", strings.TrimSpace(path))
