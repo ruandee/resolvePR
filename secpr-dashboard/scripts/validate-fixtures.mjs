@@ -84,10 +84,16 @@ function validateFixture(name, fx) {
       }
     }
 
+    // The scanner only fetches source for files it reviews; a skipped file
+    // legitimately has source "" alongside a real added_lines list.
     const lineCount = f.source.split('\n').length
     const added = new Set(f.added_lines)
-    for (const l of f.added_lines) {
-      if (l < 1 || l > lineCount) err(`${where}: added line ${l} is outside source (${lineCount} lines)`)
+    if (f.source !== '') {
+      for (const l of f.added_lines) {
+        if (l < 1 || l > lineCount) err(`${where}: added line ${l} is outside source (${lineCount} lines)`)
+      }
+    } else if (f.chunks.length > 0) {
+      err(`${where}: source is empty but the file has ${f.chunks.length} chunk(s)`)
     }
 
     if (f.language === 'unknown' && f.chunks.length > 0) warn(`${where}: language is "unknown" but chunks is not empty`)

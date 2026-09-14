@@ -120,18 +120,19 @@ func (s *Scanner) Scan(ctx context.Context, src Source, meta PRMeta) (*Result, e
 		fr := FileResult{Filename: f.Filename, Status: f.Status, Patch: f.Patch, Source: f.Source}
 		fr.Language = ast.DetectLang(f.Filename)
 
+		// Parse the patch for every non-removed file, even ones that end up
+		// skipped, so the fixture still reports which lines the PR added.
+		if f.Status != "removed" {
+			fr.Hunk = diff.Parse(f.Patch)
+			fr.AddedLines = fr.Hunk.AddedLines
+		}
 		switch {
 		case f.Status == "removed":
 			fr.Skipped = "removed"
 		case fr.Language == "unknown":
 			fr.Skipped = "unsupported language"
-		}
-		if fr.Skipped == "" {
-			fr.Hunk = diff.Parse(f.Patch)
-			fr.AddedLines = fr.Hunk.AddedLines
-			if len(fr.AddedLines) == 0 {
-				fr.Skipped = "no added lines"
-			}
+		case len(fr.AddedLines) == 0:
+			fr.Skipped = "no added lines"
 		}
 		if fr.Skipped != "" {
 			s.logf("[secpr] skip %s: %s", f.Filename, fr.Skipped)

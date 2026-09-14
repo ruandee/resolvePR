@@ -231,8 +231,10 @@ func TestFixtureMatchesContract(t *testing.T) {
 	if cs, ok := cf["chunks"].([]any); !ok || len(cs) != 0 {
 		t.Errorf("config.yaml chunks = %v, want []", cf["chunks"])
 	}
-	if al, ok := cf["added_lines"].([]any); !ok || len(al) != 0 {
-		t.Errorf("config.yaml added_lines = %v, want []", cf["added_lines"])
+	// Skipped for language, but the patch is still parsed so the fixture
+	// reports what the PR added.
+	if al, ok := cf["added_lines"].([]any); !ok || len(al) != 2 {
+		t.Errorf("config.yaml added_lines = %v, want 2 lines", cf["added_lines"])
 	}
 	if cf["source"] != "" {
 		// Not fetched (skipped) — empty string, not null.

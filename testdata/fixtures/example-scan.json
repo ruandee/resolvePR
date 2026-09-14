@@ -111,7 +111,9 @@
         "status": "modified",
         "patch": "@@ -1,2 +1,3 @@\n # api\n+Search endpoint added.\n ",
         "source": "",
-        "added_lines": [],
+        "added_lines": [
+          2
+        ],
         "chunks": []
       }
     ]
