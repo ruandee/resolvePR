@@ -1,8 +1,7 @@
-.env.local 
+.env.local
 .env
 /tmp
 .next/
 keys/
 node_modules/
-secpr-dashboard/node_modules/
 *.pem
