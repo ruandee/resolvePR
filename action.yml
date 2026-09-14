@@ -1,0 +1,30 @@
+name: SecPR
+description: AI security review of pull requests — inline comments, a summary, and a check run, powered by Claude.
+author: SecPR
+
+branding:
+  icon: shield
+  color: purple
+
+inputs:
+  anthropic_api_key:
+    description: Anthropic API key. Store it as a repository secret and pass `${{ secrets.ANTHROPIC_API_KEY }}`.
+    required: true
+  github_token:
+    description: Token used to post review comments and the check run.
+    required: false
+    default: ${{ github.token }}
+  model:
+    description: Claude model to review with.
+    required: false
+    default: claude-opus-5
+  fail_on:
+    description: Fail the check when a finding is at or above this severity (critical, high, medium, low, none).
+    required: false
+    default: high
+
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - action

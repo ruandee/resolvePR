@@ -67,16 +67,23 @@ func runScan(args []string) error {
 	if err != nil {
 		return err
 	}
+	switch {
+	case *local && *base == "":
+		return fmt.Errorf("--local requires --base REV (e.g. --base main)")
+	case !*local && (*repo == "" || *pr == 0):
+		return fmt.Errorf("scan needs --repo OWNER/NAME and --pr N, or --local --base REV")
+	}
+
+	// Fail on a missing key before any git or GitHub work.
+	client := lf.client("", "")
+	if !*dryRun && !client.Ready() {
+		return fmt.Errorf("%w (or use --dry-run)", llm.ErrNoAPIKey)
+	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 	ctx, cancelTimeout := context.WithTimeout(ctx, *timeout)
 	defer cancelTimeout()
-
-	client := lf.client("", "")
-	if !*dryRun && !client.Ready() {
-		return fmt.Errorf("%w (or use --dry-run)", llm.ErrNoAPIKey)
-	}
 
 	var (
 		src  scan.Source
@@ -84,9 +91,6 @@ func runScan(args []string) error {
 		ghs  *scan.GitHubSource
 	)
 	if *local {
-		if *base == "" {
-			return fmt.Errorf("--local requires --base REV (e.g. --base main)")
-		}
 		g := &scan.GitSource{Dir: *dir, Base: *base, Head: *head}
 		sha, err := g.HeadSHA(ctx)
 		if err != nil {
@@ -105,9 +109,6 @@ func runScan(args []string) error {
 		}
 		src = g
 	} else {
-		if *repo == "" || *pr == 0 {
-			return fmt.Errorf("scan needs --repo OWNER/NAME and --pr N, or --local --base REV")
-		}
 		owner, name, err := splitRepo(*repo)
 		if err != nil {
 			return err
@@ -134,7 +135,9 @@ func runScan(args []string) error {
 		}
 		sinks = append(sinks, &scan.GitHubSink{Token: ghs.Token, Owner: ghs.Owner, Repo: ghs.Repo, Number: ghs.Number, HeadSHA: ghs.HeadSHA})
 	}
-	if *fixtureOut != "" && !*dryRun {
+	if *fixtureOut != "" {
+		// Allowed in --dry-run too: the fixture then has files and chunks but
+		// no findings, which is enough to exercise the dashboard demo.
 		sinks = append(sinks, &scan.FixtureSink{Path: *fixtureOut, Generator: generator(client)})
 	}
 	sinks = append(sinks, &scan.StdoutSink{JSON: *asJSON, Generator: generator(client), ShowBodies: *dryRun})
@@ -143,7 +146,7 @@ func runScan(args []string) error {
 	if err != nil {
 		return err
 	}
-	if *fixtureOut != "" && !*dryRun {
+	if *fixtureOut != "" {
 		fmt.Fprintf(os.Stderr, "fixture written to %s\n", *fixtureOut)
 	}
 	if scan.MeetsThreshold(res.Findings, threshold) {

@@ -8,8 +8,8 @@ keys/
 *.pem
 secpr-dashboard/app/oracleJdk-26/
 .claude/worktrees/
-/server
-/server.exe
+/secpr
+/secpr.exe
 test.txt
 
 # stray tool worktrees

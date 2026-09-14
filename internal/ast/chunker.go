@@ -148,7 +148,7 @@ func MakeChunks(source []byte, lang, file string, changedLines []int) []Chunk {
 		return nil
 	}
 	if g := grammar(lang); g != nil {
-		if chunks := treeChunks(source, lang, file, changedLines, g); len(chunks) > 0 {
+		if chunks, ok := treeChunks(source, lang, file, changedLines, g); ok {
 			return chunks
 		}
 	}
@@ -157,18 +157,20 @@ func MakeChunks(source []byte, lang, file string, changedLines []int) []Chunk {
 
 // treeChunks parses source with tree-sitter and extracts the enclosing
 // function for each changed line. Changed lines outside any function are
-// grouped and emitted as fallback window chunks.
-func treeChunks(source []byte, lang, file string, changedLines []int, g *sitter.Language) []Chunk {
+// grouped and emitted as fallback window chunks. ok is false only when the
+// source could not be parsed at all (the caller then falls back to
+// windows); an empty, ok result means there was nothing reviewable.
+func treeChunks(source []byte, lang, file string, changedLines []int, g *sitter.Language) ([]Chunk, bool) {
 	parser := sitter.NewParser()
 	parser.SetLanguage(g)
 	tree, err := parser.ParseCtx(context.Background(), nil, source)
 	if err != nil || tree == nil {
-		return nil
+		return nil, false
 	}
 
 	types, ok := funcNodeTypes[lang]
 	if !ok {
-		return nil
+		return nil, false
 	}
 	typeSet := make(map[string]bool, len(types))
 	for _, t := range types {
@@ -188,6 +190,11 @@ func treeChunks(source []byte, lang, file string, changedLines []int, g *sitter.
 		row := uint32(cl - 1) // tree-sitter rows are 0-based
 		fn := innermostFunc(funcs, row)
 		if fn == nil {
+			// A blank line between functions is not reviewable; sending a
+			// ±30 window for it would be a wasted model call.
+			if cl >= 1 && cl <= len(lines) && strings.TrimSpace(lines[cl-1]) == "" {
+				continue
+			}
 			orphans = append(orphans, cl)
 			continue
 		}
@@ -226,7 +233,7 @@ func treeChunks(source []byte, lang, file string, changedLines []int, g *sitter.
 	if len(orphans) > 0 {
 		out = append(out, makeChunksFallback(source, lang, file, orphans)...)
 	}
-	return out
+	return out, true
 }
 
 // collectFuncNodes does a depth-first walk and returns every node whose type
@@ -308,10 +315,16 @@ func makeChunksFallback(source []byte, lang, file string, changedLines []int) []
 			continue
 		}
 
-		body := strings.Join(lines[startLine-1:endLine], "\n")
 		relativeChanged := make([]int, len(group))
 		for i, line := range group {
 			relativeChanged[i] = line - startLine + 1
+		}
+
+		// Two groups whose windows clamp to the same range (small files)
+		// would be the same text sent twice; merge them into one chunk.
+		if n := len(chunks); n > 0 && chunks[n-1].StartLine == startLine && chunks[n-1].EndLine == endLine {
+			chunks[n-1].ChangedLines = append(chunks[n-1].ChangedLines, relativeChanged...)
+			continue
 		}
 
 		chunks = append(chunks, Chunk{
@@ -319,7 +332,7 @@ func makeChunksFallback(source []byte, lang, file string, changedLines []int) []
 			Language:     lang,
 			FunctionName: fmt.Sprintf("chunk@%d-%d", startLine, endLine),
 			Kind:         KindWindow,
-			FunctionBody: body,
+			FunctionBody: strings.Join(lines[startLine-1:endLine], "\n"),
 			StartLine:    startLine,
 			EndLine:      endLine,
 			ChangedLines: relativeChanged,

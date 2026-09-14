@@ -1,8 +1,14 @@
-name: Deploy to Cloud Run
+# OPTIONAL — self-hosted webhook mode only.
+#
+# This deploys `secpr serve` (the GitHub App webhook server) to Google Cloud
+# Run. It is NOT needed for the GitHub Action (see README → Install), which
+# is the zero-infrastructure path. It requires the GCP_* secrets below plus
+# the Secret Manager entries referenced in --set-secrets, so it is triggered
+# manually rather than on every push.
+name: Deploy to Cloud Run (self-hosted webhook server)
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: deploy-group
@@ -43,6 +49,7 @@ jobs:
             --platform managed \
             --allow-unauthenticated \
             --service-account "${{ secrets.GCP_SERVICE_ACCOUNT }}" \
+            --args serve \
             --set-secrets "WEBHOOK_SECRET=WEBHOOK_SECRET:latest,GITHUB_APP_ID=GITHUB_APP_ID:latest,GITHUB_PRIVATE_KEY=GITHUB_PRIVATE_KEY:latest,ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest,DATABASE_URL=DATABASE_URL:latest" \
             --memory 512Mi \
             --cpu 1 \

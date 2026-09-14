@@ -255,6 +255,53 @@ func TestMakeChunksWindowGroups(t *testing.T) {
 	}
 }
 
+// Blank lines between functions are not reviewable and must not produce
+// window chunks; non-blank orphans (a package clause, an import) still do.
+func TestMakeChunksIgnoresBlankOrphans(t *testing.T) {
+	src := []byte("package p\n\nfunc a() {\n\tx := 1\n}\n\nfunc b() {\n\ty := 2\n}\n")
+	chunks := MakeChunks(src, "go", "p.go", []int{2, 4, 6, 8})
+	if len(chunks) != 2 {
+		t.Fatalf("got %d chunks, want 2 function chunks and no windows: %+v", len(chunks), chunks)
+	}
+	for _, c := range chunks {
+		if c.Kind != KindFunction {
+			t.Errorf("unexpected %s chunk %s", c.Kind, c.FunctionName)
+		}
+	}
+	// Only blank orphans → no chunks at all.
+	if got := MakeChunks(src, "go", "p.go", []int{2, 6}); len(got) != 0 {
+		t.Fatalf("blank-only change produced %+v", got)
+	}
+	// A non-blank orphan still gets a window.
+	if got := MakeChunks(src, "go", "p.go", []int{1, 2}); len(got) != 1 || got[0].Kind != KindWindow || !reflect.DeepEqual(got[0].ChangedLines, []int{1}) {
+		t.Fatalf("package-line change = %+v, want one window with changed [1]", got)
+	}
+}
+
+// Groups far apart in a small file clamp to the same window; they are
+// merged rather than sent twice.
+func TestMakeChunksMergesIdenticalWindows(t *testing.T) {
+	// 30-line file: 5, 20 and 28 are three groups (>5 apart) whose ±30
+	// windows all clamp to 1-30.
+	src := []byte(strings.Repeat("x\n", 30))
+	chunks := MakeChunks(src, "unknown", "f.txt", []int{5, 20, 28})
+	if len(chunks) != 1 {
+		t.Fatalf("got %d chunks, want 1 merged window: %+v", len(chunks), chunks)
+	}
+	c := chunks[0]
+	if c.StartLine != 1 || c.EndLine != 30 || c.FunctionName != "chunk@1-30" {
+		t.Fatalf("chunk = %+v", c)
+	}
+	if !reflect.DeepEqual(c.ChangedLines, []int{5, 20, 28}) {
+		t.Fatalf("ChangedLines = %v, want [5 20 28]", c.ChangedLines)
+	}
+	// Windows that differ are kept apart.
+	chunks = MakeChunks([]byte(strings.Repeat("x\n", 100)), "unknown", "f.txt", []int{10, 90})
+	if len(chunks) != 2 {
+		t.Fatalf("got %d chunks, want 2 distinct windows", len(chunks))
+	}
+}
+
 func TestMakeChunksNoChangedLines(t *testing.T) {
 	if got := MakeChunks([]byte("package p\n"), "go", "p.go", nil); got != nil {
 		t.Fatalf("got %v, want nil", got)

@@ -1,9 +1,17 @@
-secpr-dashboard/
+# Keep the Action image build context small: only Go sources are needed.
+.git/
+.github/
 .claude/
+.claire/
+secpr-dashboard/
+testdata/
 keys/
+node_modules/
 *.exe
 *.test
-testdata/
+*.md
+*.pem
 .env
 .env.*
-*.md
+.envrc
+action.yml
