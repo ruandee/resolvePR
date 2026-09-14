@@ -16,3 +16,5 @@ test.txt
 .claire/
 # TS incremental build cache
 *.tsbuildinfo
+# agent briefs (local working docs)
+.claude/briefs/
