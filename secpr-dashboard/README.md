@@ -1,49 +1,65 @@
-# ResolvePR Dashboard
+# SecPR site + demo
 
-Next.js 16 dashboard for the ResolvePR security scanner. Displays findings, PR scan history, team management, and notifications — backed by Neon Postgres on Vercel.
+The public face of SecPR: a two-page Next.js 16 site.
 
-## Setup
+- `/` — landing page: what SecPR is, how the AST-chunked review works, what the pull-request author gets,
+  and the one-file GitHub Actions install.
+- `/demo` — an interactive **replay** of a recorded scan: the diff → the chunks tree-sitter extracted →
+  the per-chunk Claude review → a results dashboard and a mock of the GitHub PR view with inline comments
+  and the check run.
+
+Everything is static. There is no auth, no database, no API route, no environment variable and no network
+request from the site. The demo is driven entirely by the JSON fixtures in [`demo-fixtures/`](demo-fixtures/).
+
+## Run it
 
 ```bash
 npm install
-
-# Copy and fill in env vars (or pull from Vercel: vercel env pull .env.local)
-cp .env.example .env.local
-
-npm run dev
-# http://localhost:3000
-
-# One-time: create DB tables
-curl http://localhost:3000/api/db/migrate
+npm run dev        # http://localhost:3000
 ```
 
-## Environment variables
+Other scripts:
 
-See [`.env.example`](.env.example) for the full list. Required:
-
-| Variable | Where to get it |
+| Script | What it does |
 |---|---|
-| `NEXT_PUBLIC_API_URL` | Your Fly.io API URL |
-| `GITHUB_CLIENT_ID` | GitHub OAuth App settings |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth App settings |
-| `POSTGRES_URL` + others | Auto-injected by Vercel when Neon DB is linked |
+| `npm run build` / `npm start` | Production build (both routes prerender as static HTML) and serve it |
+| `npm run lint` | ESLint (`eslint-config-next`) |
+| `npm run validate:fixtures` | Check every fixture in `demo-fixtures/` against the schema and consistency rules |
 
-## API routes
+## Fixtures
 
-| Route | Description |
-|---|---|
-| `GET /api/db/findings` | Read findings from Postgres (filters: repo, status, severity) |
-| `POST /api/db/findings/[id]/dismiss` | Mark a finding as false positive |
-| `GET /api/db/prs` | PR scan history |
-| `GET /api/db/migrate` | Create/migrate DB tables (run once) |
-| `GET /api/auth/github` | Start GitHub OAuth flow |
-| `GET /api/auth/callback/github` | OAuth callback |
-| `GET /api/github/repos` | List user's GitHub repos |
+Each fixture is one scanned pull request. To add or regenerate one:
 
-## Deploying to Vercel
+```bash
+# from the repository root, using the Go scanner
+secpr scan --repo owner/name --pr 142 --fixture-out secpr-dashboard/demo-fixtures/owner-name-142.json
 
-1. Set **Root Directory** to `secpr-dashboard` in Vercel project settings
-2. Add env vars (see `.env.example`)
-3. Link a Neon Postgres database via the Storage tab — env vars are injected automatically
-4. Add `https://<your-app>.vercel.app/api/auth/callback/github` to your GitHub OAuth App's authorized callbacks
-5. After first deploy: `curl https://<your-app>.vercel.app/api/db/migrate`
+cd secpr-dashboard
+npm run validate:fixtures          # fails until the file is also listed in lib/fixtures.ts
+```
+
+Then import it in `lib/fixtures.ts` and add it to the `FIXTURES` array. The schema, the validator's rules and
+the status of the current placeholder fixtures are documented in
+[`demo-fixtures/README.md`](demo-fixtures/README.md).
+
+## Layout
+
+```
+app/                 routes: / (server component) and /demo (server shell around a client replay)
+components/          shared display components (diff, source with chunk highlighting, GitHub comment and
+                     check-run mocks), the demo steps under components/demo/, small UI under components/ui/
+lib/                 fixture types + loader, design tokens, diff parser, GitHub text builders, site constants
+demo-fixtures/       scan fixtures (JSON) + schema docs
+scripts/             validate-fixtures.mjs
+```
+
+`lib/site.ts` holds the repository URL and the action reference (`OWNER/secpr@v1`) — edit it there when the
+repo is renamed. `lib/tokens.ts` and `app/globals.css` hold the design tokens.
+
+## Deploy to Vercel
+
+1. Import the repository and set **Root Directory** to `secpr-dashboard`.
+2. Framework preset: Next.js. Build command `npm run build`, output handled by Next.
+3. **No environment variables are required.** Do not add any.
+
+Any static host that can run `next build` works the same way.
