@@ -17,14 +17,43 @@ import (
 	"github.com/smacker/go-tree-sitter/typescript/typescript"
 )
 
+// Chunk kinds.
+const (
+	KindFunction = "function" // an AST function/method node
+	KindWindow   = "window"   // ±30-line window fallback
+)
+
 // Chunk is a unit of context sent to the LLM for review.
 type Chunk struct {
 	File         string
 	Language     string
-	FunctionName string
+	FunctionName string // identifier, or "chunk@START-END" for a window fallback
+	Kind         string // KindFunction | KindWindow
 	FunctionBody string
-	StartLine    int
+	StartLine    int   // absolute, 1-based, inclusive
+	EndLine      int   // absolute, 1-based, inclusive
 	ChangedLines []int // 1-based, relative to FunctionBody start
+}
+
+// AbsoluteChangedLines converts the chunk-relative ChangedLines to absolute
+// file line numbers.
+func (c Chunk) AbsoluteChangedLines() []int {
+	out := make([]int, len(c.ChangedLines))
+	for i, l := range c.ChangedLines {
+		out[i] = c.StartLine + l - 1
+	}
+	return out
+}
+
+// splitLines splits source into lines without the phantom empty element a
+// trailing newline would otherwise produce, so len(lines) is the real line
+// count and EndLine never points past the last line.
+func splitLines(source []byte) []string {
+	lines := strings.Split(string(source), "\n")
+	if n := len(lines); n > 1 && lines[n-1] == "" {
+		lines = lines[:n-1]
+	}
+	return lines
 }
 
 // DetectLang returns a short language tag based on file extension.
@@ -147,7 +176,7 @@ func treeChunks(source []byte, lang, file string, changedLines []int, g *sitter.
 	}
 
 	funcs := collectFuncNodes(tree.RootNode(), typeSet)
-	lines := strings.Split(string(source), "\n")
+	lines := splitLines(source)
 	field := nameField[lang]
 
 	type fnKey struct{ start, end uint32 }
@@ -178,8 +207,10 @@ func treeChunks(source []byte, lang, file string, changedLines []int, g *sitter.
 				File:         file,
 				Language:     lang,
 				FunctionName: name,
+				Kind:         KindFunction,
 				FunctionBody: body,
 				StartLine:    startLine,
+				EndLine:      endLine,
 			}
 			fnOrder = append(fnOrder, key)
 		}
@@ -255,7 +286,7 @@ func makeChunksFallback(source []byte, lang, file string, changedLines []int) []
 	if len(changedLines) == 0 {
 		return nil
 	}
-	lines := strings.Split(string(source), "\n")
+	lines := splitLines(source)
 	groups := groupConsecutive(changedLines)
 
 	var chunks []Chunk
@@ -271,6 +302,11 @@ func makeChunksFallback(source []byte, lang, file string, changedLines []int) []
 		if endLine > len(lines) {
 			endLine = len(lines)
 		}
+		if startLine > endLine {
+			// Changed lines point past the end of the source (stale diff);
+			// nothing to review.
+			continue
+		}
 
 		body := strings.Join(lines[startLine-1:endLine], "\n")
 		relativeChanged := make([]int, len(group))
@@ -282,8 +318,10 @@ func makeChunksFallback(source []byte, lang, file string, changedLines []int) []
 			File:         file,
 			Language:     lang,
 			FunctionName: fmt.Sprintf("chunk@%d-%d", startLine, endLine),
+			Kind:         KindWindow,
 			FunctionBody: body,
 			StartLine:    startLine,
+			EndLine:      endLine,
 			ChangedLines: relativeChanged,
 		})
 	}

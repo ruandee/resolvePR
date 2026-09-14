@@ -1,18 +1,25 @@
 package store
 
 import (
+	"strconv"
 	"sync"
 
-	"resolvepr/internal/llm"
+	"secpr/internal/llm"
 )
+
+// prKey builds the dedupe key for a PR scan record. The PR number must be
+// formatted as decimal — string(rune(n)) would turn PR 65 into "A".
+func prKey(repoFull string, pr int, sha string) string {
+	return repoFull + "/" + strconv.Itoa(pr) + "/" + sha
+}
 
 // MemoryStore is a thread-safe in-process fallback used when no DATABASE_URL is set.
 type MemoryStore struct {
-	mu       sync.RWMutex
-	byID     map[string]llm.Finding
-	order    []string // insertion order, newest last
-	prs      []PRRecord
-	prByKey  map[string]int // "repo_full/pr/sha" -> index in prs
+	mu      sync.RWMutex
+	byID    map[string]llm.Finding
+	order   []string // insertion order, newest last
+	prs     []PRRecord
+	prByKey map[string]int // "repo_full/pr/sha" -> index in prs
 }
 
 func NewMemory() *MemoryStore {
@@ -59,7 +66,7 @@ func (s *MemoryStore) AllFindings(repo, status, severity string) ([]llm.Finding,
 func (s *MemoryStore) UpsertPR(pr PRRecord) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	key := pr.RepoFull + "/" + string(rune(pr.PR)) + "/" + pr.SHA
+	key := prKey(pr.RepoFull, pr.PR, pr.SHA)
 	if idx, ok := s.prByKey[key]; ok {
 		s.prs[idx] = pr
 	} else {

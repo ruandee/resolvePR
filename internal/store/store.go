@@ -2,16 +2,16 @@
 // Use New(dsn) for PostgreSQL or NewMemory() for a local in-process fallback.
 package store
 
-import "resolvepr/internal/llm"
+import "secpr/internal/llm"
 
-// PRRecord tracks a pull request that ResolvePR has scanned.
+// PRRecord tracks a pull request that SecPR has scanned.
 type PRRecord struct {
 	Owner         string `json:"owner"`
 	Repo          string `json:"repo"`
 	RepoFull      string `json:"repo_full"`
 	PR            int    `json:"pr"`
 	SHA           string `json:"sha"`
-	Status        string `json:"status"`        // "scanning" | "complete" | "failed"
+	Status        string `json:"status"`         // "scanning" | "complete" | "failed"
 	FindingsCount int    `json:"findings_count"` // updated after scan finishes
 	ScannedAt     int64  `json:"scanned_at"`
 	ErrorMessage  string `json:"error_message,omitempty"`

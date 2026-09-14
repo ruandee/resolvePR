@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"resolvepr/internal/llm"
+	"secpr/internal/llm"
 )
 
 type checkRunCreate struct {
@@ -36,7 +36,7 @@ type checkRunOutput struct {
 // Returns the Check Run ID — keep it, you need it to complete the run later.
 func CreateCheck(ctx context.Context, token, owner, repo, sha string) (int64, error) {
 	body, _ := json.Marshal(checkRunCreate{
-		Name:    "ResolvePR",
+		Name:    "SecPR",
 		HeadSHA: sha,
 		Status:  "in_progress",
 	})
@@ -76,9 +76,9 @@ func CompleteCheck(ctx context.Context, token, owner, repo string, checkID int64
 		}
 	}
 
-	title := fmt.Sprintf("ResolvePR found %d issues", len(findings))
+	title := fmt.Sprintf("SecPR found %d issues", len(findings))
 	if len(findings) == 0 {
-		title = "ResolvePR — no issues found"
+		title = "SecPR — no issues found"
 		conclusion = "success"
 	}
 
@@ -110,25 +110,32 @@ func CompleteCheck(ctx context.Context, token, owner, repo string, checkID int64
 }
 
 func buildSummary(findings []llm.Finding) string {
+	return BuildSummary(findings)
+}
+
+// BuildSummary renders the markdown severity table used for the PR summary
+// comment, the check run output, and the Actions job summary.
+func BuildSummary(findings []llm.Finding) string {
 	if len(findings) == 0 {
-		return "All scanned chunks clean. ResolvePR found no security issues."
+		return "All scanned chunks clean. SecPR found no security issues."
 	}
 
-	bySev := map[string]int{"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0}
+	bySev := map[string]int{}
 	for _, f := range findings {
 		bySev[f.Severity]++
 	}
 
-	return fmt.Sprintf(`## ResolvePR found %d issues
+	return fmt.Sprintf(`## SecPR found %d issues
 
 | Severity | Count |
 |---|---|
 | 🔴 CRITICAL | %d |
 | 🟠 HIGH | %d |
 | 🟡 MEDIUM | %d |
+| 🔵 LOW | %d |
 
 See inline review comments below for details on each finding and suggested fixes.
 
 ---
-<sub>Powered by Claude · AST-aware chunking</sub>`, len(findings), bySev["CRITICAL"], bySev["HIGH"], bySev["MEDIUM"])
+<sub>Powered by Claude · AST-aware chunking</sub>`, len(findings), bySev["CRITICAL"], bySev["HIGH"], bySev["MEDIUM"], bySev["LOW"])
 }
