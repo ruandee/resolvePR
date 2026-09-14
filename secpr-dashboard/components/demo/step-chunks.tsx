@@ -31,7 +31,7 @@ export function StepChunks({ fixture }: { fixture: ScanFixture }) {
       <StepIntro
         id="chunks-title"
         title="AST chunking"
-        body="Each scanned file is parsed with tree-sitter. Only the functions that contain added lines are kept; everything else is dimmed here because the model never sees it. Added lines outside any function fall back to a ±30-line window."
+        body="Each scanned file is parsed with tree-sitter. Only the functions that contain added lines are kept; everything else is folded away here because the model never sees it. Added lines outside any function fall back to a ±30-line window."
         aside={
           <div style={{ ...glass, padding: '12px 14px', display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
             <Stat value={`${sent} / ${total}`} label={`lines sent (${pct(sent, total)}%)`} />
@@ -61,7 +61,8 @@ export function StepChunks({ fixture }: { fixture: ScanFixture }) {
                 lang={f.language}
                 chunks={f.chunks}
                 changedLines={f.added_lines}
-                maxHeight={560}
+                foldContext={3}
+                maxHeight={640}
                 style={{ border: 'none', borderRadius: 0 }}
                 ariaLabel={`Source of ${f.filename} with extracted chunks highlighted`}
               />

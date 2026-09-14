@@ -26,6 +26,12 @@ interface Props {
   dimAll?: boolean
   /** Show "functionName() · function" labels above each chunk start. */
   showChunkLabels?: boolean
+  /**
+   * Collapse runs of lines outside every chunk into a single "N lines not
+   * sent" row, keeping this many lines of context on either side of a chunk.
+   * Undefined = show every line.
+   */
+  foldContext?: number
   maxHeight?: number
   style?: CSSProperties
   ariaLabel?: string
@@ -35,7 +41,7 @@ const CELL: CSSProperties = { padding: '0 10px', fontSize: 12.5, lineHeight: '22
 
 export function SourceView({
   source, lang, chunks = [], changedLines = [], pins = [], range, dimOpacity = 0.35, dimAll = false,
-  showChunkLabels = true, maxHeight, style, ariaLabel,
+  showChunkLabels = true, foldContext, maxHeight, style, ariaLabel,
 }: Props) {
   const lines = sourceLines(source)
   const from = range ? Math.max(1, range[0]) : 1
@@ -48,8 +54,42 @@ export function SourceView({
   const inChunk = (n: number) => !dimAll && (chunks.length === 0 || chunks.some((c) => n >= c.start_line && n <= c.end_line))
   const gutterWidth = `${String(to).length + 1}ch`
 
+  // A line survives folding if it is in a chunk, within foldContext of one,
+  // or carries a marker (added line, pin). Runs shorter than 3 aren't worth
+  // a fold row — just show them.
+  const keep = (n: number) =>
+    foldContext === undefined ||
+    inChunk(n) ||
+    changed.has(n) ||
+    pinMap.has(n) ||
+    chunks.some((c) => n >= c.start_line - foldContext && n <= c.end_line + foldContext)
+
   const rows: ReactNode[] = []
   for (let n = from; n <= to; n++) {
+    if (!keep(n)) {
+      let end = n
+      while (end + 1 <= to && !keep(end + 1)) end++
+      const run = end - n + 1
+      if (run >= 3) {
+        rows.push(
+          <tr key={`fold-${n}`}>
+            <td
+              colSpan={3}
+              style={{
+                padding: '5px 10px', fontSize: 11.5, fontFamily: TOKENS.fontMono, textAlign: 'center',
+                color: TOKENS.textTertiary, background: 'rgba(255,255,255,0.025)',
+                borderTop: `1px dashed ${TOKENS.surfaceBorder}`, borderBottom: `1px dashed ${TOKENS.surfaceBorder}`,
+                userSelect: 'none', whiteSpace: 'normal',
+              }}
+            >
+              ⋯ {run} lines (L{n}–L{end}) not sent to the model ⋯
+            </td>
+          </tr>,
+        )
+        n = end
+        continue
+      }
+    }
     const starts = showChunkLabels ? chunkStarts.get(n) : undefined
     if (starts) {
       for (const c of starts) {
