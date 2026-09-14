@@ -180,8 +180,24 @@ func TestMakeChunksMethodAndClosure(t *testing.T) {
 }
 
 // Changed lines outside any function → window fallback.
+// A 12-line file whose line 3 is a top-level var (reviewable, outside any
+// function) — package and import lines are inert and covered elsewhere.
+const outsideSrc = `package db
+
+var defaultLimit = 100
+
+func searchUsers(db *sql.DB, q string) ([]User, error) {
+	rows, err := db.Query("SELECT * FROM users WHERE name = ?", q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanUsers(rows)
+}
+`
+
 func TestMakeChunksOutsideFunctionUsesWindow(t *testing.T) {
-	src := readTestdata(t, "clean/clean-prepared.go") // 12 lines; line 3 is the import
+	src := []byte(outsideSrc)
 	chunks := MakeChunks(src, "go", "db.go", []int{3})
 	if len(chunks) != 1 {
 		t.Fatalf("got %d chunks, want 1", len(chunks))
@@ -203,15 +219,15 @@ func TestMakeChunksOutsideFunctionUsesWindow(t *testing.T) {
 
 // Mixed: one line in a function, one outside → function chunk + window.
 func TestMakeChunksMixedInsideAndOutside(t *testing.T) {
-	src := readTestdata(t, "clean/clean-prepared.go")
-	chunks := MakeChunks(src, "go", "db.go", []int{1, 6})
+	src := []byte(outsideSrc)
+	chunks := MakeChunks(src, "go", "db.go", []int{3, 6})
 	if len(chunks) != 2 {
 		t.Fatalf("got %d chunks, want 2", len(chunks))
 	}
 	if chunks[0].Kind != KindFunction || chunks[0].FunctionName != "searchUsers" {
 		t.Errorf("chunk 0 = %+v", chunks[0])
 	}
-	if chunks[1].Kind != KindWindow || !reflect.DeepEqual(chunks[1].ChangedLines, []int{1}) {
+	if chunks[1].Kind != KindWindow || !reflect.DeepEqual(chunks[1].ChangedLines, []int{3}) {
 		t.Errorf("chunk 1 = %+v", chunks[1])
 	}
 }
@@ -258,8 +274,9 @@ func TestMakeChunksWindowGroups(t *testing.T) {
 // Blank lines between functions are not reviewable and must not produce
 // window chunks; non-blank orphans (a package clause, an import) still do.
 func TestMakeChunksIgnoresBlankOrphans(t *testing.T) {
-	src := []byte("package p\n\nfunc a() {\n\tx := 1\n}\n\nfunc b() {\n\ty := 2\n}\n")
-	chunks := MakeChunks(src, "go", "p.go", []int{2, 4, 6, 8})
+	// 1 package, 3 var, 5-7 func a, 9-11 func b; 2/4/8 blank.
+	src := []byte("package p\n\nvar z = 3\n\nfunc a() {\n\tx := 1\n}\n\nfunc b() {\n\ty := 2\n}\n")
+	chunks := MakeChunks(src, "go", "p.go", []int{2, 6, 8, 10})
 	if len(chunks) != 2 {
 		t.Fatalf("got %d chunks, want 2 function chunks and no windows: %+v", len(chunks), chunks)
 	}
@@ -269,12 +286,16 @@ func TestMakeChunksIgnoresBlankOrphans(t *testing.T) {
 		}
 	}
 	// Only blank orphans → no chunks at all.
-	if got := MakeChunks(src, "go", "p.go", []int{2, 6}); len(got) != 0 {
+	if got := MakeChunks(src, "go", "p.go", []int{2, 4, 8}); len(got) != 0 {
 		t.Fatalf("blank-only change produced %+v", got)
 	}
-	// A non-blank orphan still gets a window.
-	if got := MakeChunks(src, "go", "p.go", []int{1, 2}); len(got) != 1 || got[0].Kind != KindWindow || !reflect.DeepEqual(got[0].ChangedLines, []int{1}) {
-		t.Fatalf("package-line change = %+v, want one window with changed [1]", got)
+	// The package clause is inert too.
+	if got := MakeChunks(src, "go", "p.go", []int{1}); len(got) != 0 {
+		t.Fatalf("package-line change produced %+v, want nothing", got)
+	}
+	// A reviewable orphan (top-level var) still gets a window.
+	if got := MakeChunks(src, "go", "p.go", []int{3, 4}); len(got) != 1 || got[0].Kind != KindWindow || !reflect.DeepEqual(got[0].ChangedLines, []int{3}) {
+		t.Fatalf("var-line change = %+v, want one window with changed [3]", got)
 	}
 }
 
@@ -371,6 +392,7 @@ func TestMakeChunksTypeScript(t *testing.T) {
 func TestMakeChunksPython(t *testing.T) {
 	src := []byte(strings.Join([]string{
 		"import subprocess",
+		"TIMEOUT = 5",
 		"",
 		"def ping(host):",
 		"    return subprocess.run('ping -c 1 ' + host, shell=True)",
@@ -381,17 +403,92 @@ func TestMakeChunksPython(t *testing.T) {
 		"        return await http.get(url)",
 		"",
 	}, "\n"))
-	chunks := MakeChunks(src, "py", "svc.py", []int{4})
-	if len(chunks) != 1 || chunks[0].FunctionName != "ping" || chunks[0].StartLine != 3 || chunks[0].EndLine != 4 {
+	chunks := MakeChunks(src, "py", "svc.py", []int{5})
+	if len(chunks) != 1 || chunks[0].FunctionName != "ping" || chunks[0].StartLine != 4 || chunks[0].EndLine != 5 {
 		t.Fatalf("py function chunk = %+v", chunks)
 	}
-	chunks = MakeChunks(src, "py", "svc.py", []int{9})
-	if len(chunks) != 1 || chunks[0].FunctionName != "fetch" || chunks[0].StartLine != 8 || chunks[0].EndLine != 9 {
+	chunks = MakeChunks(src, "py", "svc.py", []int{10})
+	if len(chunks) != 1 || chunks[0].FunctionName != "fetch" || chunks[0].StartLine != 9 || chunks[0].EndLine != 10 {
 		t.Fatalf("py async method chunk = %+v", chunks)
 	}
-	// Module-level import → window.
-	chunks = MakeChunks(src, "py", "svc.py", []int{1})
+	// Module-level import → inert, nothing to review.
+	if chunks = MakeChunks(src, "py", "svc.py", []int{1}); len(chunks) != 0 {
+		t.Fatalf("py import-line chunk = %+v, want none", chunks)
+	}
+	// Module-level statement → window.
+	chunks = MakeChunks(src, "py", "svc.py", []int{2})
 	if len(chunks) != 1 || chunks[0].Kind != KindWindow {
 		t.Fatalf("py module-level chunk = %+v, want window", chunks)
+	}
+}
+
+// A newly added file changes every line. The package clause, import block
+// and comments are inert and must not produce a window chunk that duplicates
+// the function chunks — that is how a real finding ended up pinned to an
+// `"os/exec"` import line on the first live run.
+func TestMakeChunksNewFileHeaderIsInert(t *testing.T) {
+	src := []byte(`package ops
+
+import (
+	"net/http"
+	"os/exec"
+)
+
+// Health pings an upstream host named in the query string.
+func Health(w http.ResponseWriter, r *http.Request) {
+	host := r.URL.Query().Get("host")
+	pingHost(host)
+}
+
+func pingHost(host string) ([]byte, error) {
+	return exec.Command("sh", "-c", "ping -c 1 "+host).Output()
+}
+`)
+	all := make([]int, 16)
+	for i := range all {
+		all[i] = i + 1
+	}
+	chunks := MakeChunks(src, "go", "health.go", all)
+	var names []string
+	for _, c := range chunks {
+		names = append(names, c.Kind+":"+c.FunctionName)
+	}
+	want := []string{"function:Health", "function:pingHost"}
+	if !reflect.DeepEqual(names, want) {
+		t.Fatalf("chunks = %v, want %v (no window for package/import/comment lines)", names, want)
+	}
+}
+
+// A top-level const is reviewable (hard-coded secrets live there), so a
+// changed const line outside any function still gets a window.
+func TestMakeChunksTopLevelConstStillWindowed(t *testing.T) {
+	src := []byte(`package cfg
+
+import "os"
+
+const apiKey = "sk-live-4xK9mN2pL8wR3vQs9"
+
+func key() string { return apiKey }
+`)
+	chunks := MakeChunks(src, "go", "cfg.go", []int{1, 3, 5})
+	if len(chunks) != 1 || chunks[0].Kind != KindWindow {
+		t.Fatalf("chunks = %+v, want exactly one window chunk for the const line", chunks)
+	}
+	if got := chunks[0].AbsoluteChangedLines(); !reflect.DeepEqual(got, []int{5}) {
+		t.Fatalf("window changed lines = %v, want [5] (package and import lines dropped)", got)
+	}
+}
+
+func TestMakeChunksPythonImportsAreInert(t *testing.T) {
+	src := []byte(`import os
+from subprocess import run
+# helper module
+
+def ping(host):
+    return run("ping -c 1 " + host, shell=True)
+`)
+	chunks := MakeChunks(src, "py", "ping.py", []int{1, 2, 3, 5, 6})
+	if len(chunks) != 1 || chunks[0].Kind != KindFunction || chunks[0].FunctionName != "ping" {
+		t.Fatalf("chunks = %+v, want only the ping() function chunk", chunks)
 	}
 }

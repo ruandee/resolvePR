@@ -157,8 +157,8 @@ func TestGitSource(t *testing.T) {
 			chunks = append(chunks, f.Filename+":"+c.FunctionName)
 		}
 	}
-	// renamed.go has no added lines; new.go's package clause is outside any function → window.
-	want := []string{"db.go:a", "new.go:n", "new.go:chunk@1-3"}
+	// renamed.go has no added lines; new.go's package clause is inert (no window for it).
+	want := []string{"db.go:a", "new.go:n"}
 	if !reflect.DeepEqual(chunks, want) {
 		t.Fatalf("chunks = %v, want %v", chunks, want)
 	}

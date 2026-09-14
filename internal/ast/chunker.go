@@ -128,6 +128,23 @@ var funcNodeTypes = map[string][]string{
 	"rb":   {"method", "singleton_method"},
 }
 
+// inertNodeTypes lists node types whose lines are never worth a review call
+// on their own: package clauses, imports, comments. A changed line outside
+// any function that sits inside one of these is dropped instead of becoming
+// a ±30-line window — otherwise every new file yields a window chunk over
+// its header that duplicates the function chunks below it, and the model,
+// forced to report on a changed line, pins a real finding to an import.
+var inertNodeTypes = map[string][]string{
+	"go":   {"package_clause", "import_declaration", "comment"},
+	"js":   {"import_statement", "comment"},
+	"ts":   {"import_statement", "comment"},
+	"tsx":  {"import_statement", "comment"},
+	"py":   {"import_statement", "import_from_statement", "future_import_statement", "comment"},
+	"java": {"package_declaration", "import_declaration", "line_comment", "block_comment"},
+	"rs":   {"use_declaration", "extern_crate_declaration", "line_comment", "block_comment"},
+	"rb":   {"comment"},
+}
+
 // nameField is the child field name that holds a node's identifier.
 var nameField = map[string]string{
 	"go":   "name",
@@ -180,6 +197,10 @@ func treeChunks(source []byte, lang, file string, changedLines []int, g *sitter.
 	funcs := collectFuncNodes(tree.RootNode(), typeSet)
 	lines := splitLines(source)
 	field := nameField[lang]
+	inert := make(map[string]bool, len(inertNodeTypes[lang]))
+	for _, t := range inertNodeTypes[lang] {
+		inert[t] = true
+	}
 
 	type fnKey struct{ start, end uint32 }
 	fnChunks := map[fnKey]*Chunk{}
@@ -191,8 +212,12 @@ func treeChunks(source []byte, lang, file string, changedLines []int, g *sitter.
 		fn := innermostFunc(funcs, row)
 		if fn == nil {
 			// A blank line between functions is not reviewable; sending a
-			// ±30 window for it would be a wasted model call.
+			// ±30 window for it would be a wasted model call. Same for
+			// package/import/comment lines (see inertNodeTypes).
 			if cl >= 1 && cl <= len(lines) && strings.TrimSpace(lines[cl-1]) == "" {
+				continue
+			}
+			if cl >= 1 && cl <= len(lines) && isInertLine(tree.RootNode(), row, lines[cl-1], inert) {
 				continue
 			}
 			orphans = append(orphans, cl)
@@ -234,6 +259,25 @@ func treeChunks(source []byte, lang, file string, changedLines []int, g *sitter.
 		out = append(out, makeChunksFallback(source, lang, file, orphans)...)
 	}
 	return out, true
+}
+
+// isInertLine reports whether the smallest node at the first non-blank
+// character of row, or any of its ancestors, is one of the inert types
+// (package clause, import, comment). Inside an `import (` … `)` block the
+// point resolves to an import_spec whose ancestor is the import_declaration.
+func isInertLine(root *sitter.Node, row uint32, text string, inert map[string]bool) bool {
+	if len(inert) == 0 {
+		return false
+	}
+	col := uint32(len(text) - len(strings.TrimLeft(text, " \t")))
+	pt := sitter.Point{Row: row, Column: col}
+	n := root.NamedDescendantForPointRange(pt, pt)
+	for ; n != nil && n != root; n = n.Parent() {
+		if inert[n.Type()] {
+			return true
+		}
+	}
+	return false
 }
 
 // collectFuncNodes does a depth-first walk and returns every node whose type
