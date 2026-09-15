@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { Search, X } from 'lucide-react'
 import type { Finding, Severity } from '@/lib/fixtures'
 import { SEVERITY_ORDER, severityRank } from '@/lib/fixtures'
-import { SEVERITY_STYLE, STATUS_STYLE, TOKENS, glass, eyebrow } from '@/lib/tokens'
+import { SEVERITY_STYLE, STATUS_STYLE, TOKENS, codeSurface, eyebrow } from '@/lib/tokens'
 import { SeverityBadge } from './severity-badge'
 
 interface Props {
@@ -43,7 +43,7 @@ export function FindingsTable({ findings, onSelect, selectedId }: Props) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ ...glass, borderRadius: 10, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.04)', border: `1px solid ${query ? TOKENS.accentBorder : TOKENS.surfaceBorder}`, borderRadius: 8, padding: '0 10px', flex: '1 1 180px', maxWidth: 300, height: 40 }}>
           <Search size={13} strokeWidth={1.5} color={TOKENS.textTertiary} aria-hidden />
           <span className="sr-only">Search findings</span>
@@ -84,7 +84,7 @@ export function FindingsTable({ findings, onSelect, selectedId }: Props) {
         </span>
       </div>
 
-      <div className="code-scroll" style={{ ...glass, borderRadius: 10, overflow: 'auto' }}>
+      <div className="code-scroll" style={{ ...codeSurface, overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
           <thead>
             <tr style={{ borderBottom: `1px solid ${TOKENS.surfaceBorder}`, background: 'rgba(255,255,255,0.02)' }}>

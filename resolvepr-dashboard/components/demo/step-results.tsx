@@ -7,11 +7,11 @@ import { DiffView } from '@/components/diff-view'
 import { GithubComment } from '@/components/github-comment'
 import { FindingDrawer } from '@/components/ui/finding-drawer'
 import { FindingsTable } from '@/components/ui/findings-table'
-import { StatCard } from '@/components/ui/stat-card'
+import { Stat, StatStrip } from '@/components/ui/stat-card'
 import type { Finding, FindingStatus, ScanFixture } from '@/lib/fixtures'
 import { allChunks, avgConfidence, formatDuration, scannedFiles, skippedFiles, sourceLine } from '@/lib/fixtures'
 import { countChanges } from '@/lib/diff'
-import { TOKENS, glass } from '@/lib/tokens'
+import { TOKENS } from '@/lib/tokens'
 import { Changes, FileHeader, StepIntro } from './step-intro'
 
 interface Props {
@@ -23,6 +23,9 @@ interface Props {
 }
 
 type Tab = 'dashboard' | 'author'
+
+// FileHeader inside the GitHub-styled boxes needs GitHub's own header chrome.
+const GH_HEAD = { padding: '10px 14px', background: '#161b22', borderBottom: '1px solid #30363d' } as const
 
 /** Step 4: the results dashboard and the mock GitHub pull-request view. */
 export function StepResults({ fixture, findings, onStatus, onRestart }: Props) {
@@ -45,7 +48,7 @@ export function StepResults({ fixture, findings, onStatus, onRestart }: Props) {
         title="Results"
         body="Two views of the same scan: the dashboard a security team would look at, and the pull request as its author sees it."
         aside={
-          <div role="tablist" aria-label="Result views" style={{ ...glass, padding: 4, display: 'inline-flex', gap: 2 }}>
+          <div role="tablist" aria-label="Result views" style={{ display: 'inline-flex' }}>
             <TabButton active={tab === 'dashboard'} onClick={() => setTab('dashboard')} icon={<LayoutDashboard size={14} aria-hidden />} id="tab-dashboard" controls="panel-dashboard">Dashboard</TabButton>
             <TabButton active={tab === 'author'} onClick={() => setTab('author')} icon={<MessageSquareText size={14} aria-hidden />} id="tab-author" controls="panel-author">What the author sees</TabButton>
           </div>
@@ -54,12 +57,12 @@ export function StepResults({ fixture, findings, onStatus, onRestart }: Props) {
 
       {tab === 'dashboard' && (
         <div id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <StatCard label="Findings" value={findings.length} sub={findings.length === 0 ? 'nothing above the gate' : `${openCount} open`} accent="red" icon="alert" />
-            <StatCard label="Critical & high" value={critHigh} sub={critHigh > 0 ? 'check run fails the PR' : 'check run passes'} accent="orange" icon="shield" />
-            <StatCard label="Chunks reviewed" value={chunks} sub={`${stats?.llm_calls ?? chunks} LLM call${(stats?.llm_calls ?? chunks) === 1 ? '' : 's'}${stats?.duration_ms !== undefined ? ` · ${formatDuration(stats.duration_ms)}` : ''}`} accent="blue" icon="chunks" />
-            <StatCard label="Avg confidence" value={findings.length ? `${Math.round(avgConfidence(findings) * 100)}%` : '—'} sub="gate is 87%" accent="green" icon="check" />
-          </div>
+          <StatStrip>
+            <Stat label="Findings" value={findings.length} sub={findings.length === 0 ? 'nothing above the gate' : `${openCount} open`} accent="red" />
+            <Stat label="Critical & high" value={critHigh} sub={critHigh > 0 ? 'check run fails the PR' : 'check run passes'} accent="orange" />
+            <Stat label="Chunks reviewed" value={chunks} sub={`${stats?.llm_calls ?? chunks} LLM call${(stats?.llm_calls ?? chunks) === 1 ? '' : 's'}${stats?.duration_ms !== undefined ? ` · ${formatDuration(stats.duration_ms)}` : ''}`} accent="blue" />
+            <Stat label="Avg confidence" value={findings.length ? `${Math.round(avgConfidence(findings) * 100)}%` : '—'} sub="gate is 87%" accent="green" />
+          </StatStrip>
           <FindingsTable findings={findings} onSelect={(f) => setSelectedId(f.id)} selectedId={selectedId} />
           <FindingDrawer finding={selected} before={selected ? before(selected) : ''} onClose={() => setSelectedId(null)} onStatus={onStatus} />
         </div>
@@ -87,8 +90,7 @@ function TabButton({ active, onClick, icon, id, controls, children }: { active: 
       aria-selected={active}
       aria-controls={controls}
       onClick={onClick}
-      className="btn btn-sm"
-      style={{ minHeight: 40, background: active ? TOKENS.accentSoft : 'transparent', color: active ? TOKENS.textPrimary : TOKENS.textSecondary, border: `1px solid ${active ? TOKENS.accentBorder : 'transparent'}` }}
+      className="tab-btn"
     >
       {icon} {children}
     </button>
@@ -130,7 +132,7 @@ export function AuthorView({ fixture, findings, before }: { fixture: ScanFixture
           }
           return (
             <div key={f.filename} style={{ border: `1px solid ${GH.border}`, borderRadius: 8, overflow: 'hidden' }}>
-              <FileHeader filename={f.filename} status={f.status} language={f.language} right={<><Changes added={c.added} removed={c.removed} />{fileFindings.length > 0 && <span style={{ fontSize: 12, color: GH.muted }}>{fileFindings.length} comment{fileFindings.length === 1 ? '' : 's'}</span>}</>} />
+              <FileHeader filename={f.filename} status={f.status} language={f.language} style={GH_HEAD} right={<><Changes added={c.added} removed={c.removed} />{fileFindings.length > 0 && <span style={{ fontSize: 12, color: GH.muted }}>{fileFindings.length} comment{fileFindings.length === 1 ? '' : 's'}</span>}</>} />
               <DiffView patch={f.patch} lang={f.language} annotations={annotations} highlightLines={fileFindings.map((x) => x.line)} style={{ border: 'none', borderRadius: 0, background: GH.bg }} ariaLabel={`Diff of ${f.filename} with review comments`} />
             </div>
           )
@@ -139,7 +141,7 @@ export function AuthorView({ fixture, findings, before }: { fixture: ScanFixture
           const c = countChanges(f.patch)
           return (
             <div key={f.filename} style={{ border: `1px solid ${GH.border}`, borderRadius: 8, overflow: 'hidden' }}>
-              <FileHeader filename={f.filename} status={f.status} language={f.language} right={<><Changes added={c.added} removed={c.removed} /><span style={{ fontSize: 12, color: GH.muted }}>not scanned</span></>} />
+              <FileHeader filename={f.filename} status={f.status} language={f.language} style={GH_HEAD} right={<><Changes added={c.added} removed={c.removed} /><span style={{ fontSize: 12, color: GH.muted }}>not scanned</span></>} />
               <DiffView patch={f.patch} lang={f.language} style={{ border: 'none', borderRadius: 0, background: GH.bg }} ariaLabel={`Diff of ${f.filename}`} />
             </div>
           )

@@ -1,25 +1,25 @@
-import type { ReactNode } from 'react'
-import { TOKENS } from '@/lib/tokens'
+import type { CSSProperties, ReactNode } from 'react'
+import { TOKENS, label } from '@/lib/tokens'
 
 export function StepIntro({ id, title, body, aside }: { id: string; title: string; body: ReactNode; aside?: ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
-      <div style={{ flex: '1 1 320px', minWidth: 0 }}>
-        <h2 id={id} style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.015em', margin: '0 0 6px' }}>{title}</h2>
-        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: TOKENS.textSecondary, maxWidth: 720 }}>{body}</p>
+    <div className="step-intro">
+      <div style={{ flex: '1 1 360px', minWidth: 0 }}>
+        <h2 id={id} style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-0.02em', margin: '0 0 8px', lineHeight: 1.2 }}>{title}</h2>
+        <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.6, color: TOKENS.textSecondary, maxWidth: 640 }}>{body}</p>
       </div>
-      {aside}
+      {aside && <div className="step-aside">{aside}</div>}
     </div>
   )
 }
 
-export function FileHeader({ filename, status, language, right }: { filename: string; status: string; language: string; right?: ReactNode }) {
+/** Borderless file heading: name, then status and language as a quiet mono annotation. */
+export function FileHeader({ filename, status, language, right, style }: { filename: string; status: string; language: string; right?: ReactNode; style?: CSSProperties }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderBottom: `1px solid ${TOKENS.surfaceBorder}`, flexWrap: 'wrap' }}>
-      <code style={{ fontSize: 13, color: TOKENS.textPrimary, fontWeight: 600 }}>{filename}</code>
-      <span style={{ fontSize: 10.5, fontWeight: 600, padding: '2px 7px', borderRadius: 5, background: 'rgba(255,255,255,0.05)', border: `1px solid ${TOKENS.surfaceBorder}`, color: TOKENS.textSecondary, textTransform: 'capitalize' }}>{status}</span>
-      <span style={{ fontSize: 10.5, padding: '2px 7px', borderRadius: 5, background: 'rgba(255,255,255,0.05)', border: `1px solid ${TOKENS.surfaceBorder}`, color: TOKENS.textTertiary, fontFamily: TOKENS.fontMono }}>{language}</span>
-      {right && <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>{right}</span>}
+    <div className="file-head" style={style}>
+      <code style={{ fontSize: 13.5, color: TOKENS.textPrimary, fontWeight: 600 }}>{filename}</code>
+      <span style={{ ...label, textTransform: 'none', letterSpacing: 0 }}>{status} · {language}</span>
+      {right && <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>{right}</span>}
     </div>
   )
 }

@@ -1,10 +1,10 @@
 'use client'
 
-import { Ban, Braces } from 'lucide-react'
+import { Ban } from 'lucide-react'
 import { SourceView } from '@/components/source-view'
 import type { ScanFile, ScanFixture } from '@/lib/fixtures'
 import { chunkLineCount, scannedFiles, skippedFiles, sourceLines } from '@/lib/fixtures'
-import { TOKENS, glass } from '@/lib/tokens'
+import { TOKENS } from '@/lib/tokens'
 import { FileHeader, StepIntro } from './step-intro'
 
 const pct = (n: number, d: number) => (d === 0 ? 0 : Math.round((n / d) * 100))
@@ -33,29 +33,32 @@ export function StepChunks({ fixture }: { fixture: ScanFixture }) {
         title="AST chunking"
         body="Each scanned file is parsed with tree-sitter. Only the functions that contain added lines are kept; everything else is folded away here because the model never sees it. Added lines outside any function fall back to a ±30-line window."
         aside={
-          <div style={{ ...glass, padding: '12px 14px', display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
+          <>
             <Stat value={`${sent} / ${total}`} label={`lines sent (${pct(sent, total)}%)`} />
             <Stat value={String(chunks)} label={`chunk${chunks === 1 ? '' : 's'} → ${chunks} LLM call${chunks === 1 ? '' : 's'}`} />
-          </div>
+          </>
         }
       />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div>
         {scanned.map((f) => {
           const lines = sourceLines(f.source).length
           const kept = chunkLineCount(f)
           return (
-            <div key={f.filename} style={{ ...glass, overflow: 'hidden' }}>
-              <FileHeader filename={f.filename} status={f.status} language={f.language} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: TOKENS.accentSoft, borderBottom: `1px solid ${TOKENS.surfaceBorder}`, fontSize: 13, color: TOKENS.textPrimary, flexWrap: 'wrap' }}>
-                <Braces size={15} color={TOKENS.accent} aria-hidden />
-                <span>
-                  <strong>{describe(f)}</strong> · {kept} of {lines} lines sent to the model ({pct(kept, lines)}%)
-                </span>
-                <span style={{ marginLeft: 'auto', fontSize: 12, color: TOKENS.textSecondary, fontFamily: TOKENS.fontMono }}>
-                  {f.chunks.map((c) => (c.kind === 'window' ? c.function_name : `${c.function_name}()`)).join(', ')}
-                </span>
-              </div>
+            <div key={f.filename} className="file-block">
+              <FileHeader
+                filename={f.filename}
+                status={f.status}
+                language={f.language}
+                right={
+                  <span style={{ fontSize: 12, color: TOKENS.textSecondary, fontFamily: TOKENS.fontMono }}>
+                    {f.chunks.map((c) => (c.kind === 'window' ? c.function_name : `${c.function_name}()`)).join(', ')}
+                  </span>
+                }
+              />
+              <p style={{ margin: '0 0 10px', fontSize: 13, color: TOKENS.textSecondary }}>
+                <strong style={{ color: TOKENS.textPrimary, fontWeight: 600 }}>{describe(f)}</strong> · {kept} of {lines} lines sent to the model ({pct(kept, lines)}%)
+              </p>
               <SourceView
                 source={f.source}
                 lang={f.language}
@@ -63,7 +66,6 @@ export function StepChunks({ fixture }: { fixture: ScanFixture }) {
                 changedLines={f.added_lines}
                 foldContext={3}
                 maxHeight={640}
-                style={{ border: 'none', borderRadius: 0 }}
                 ariaLabel={`Source of ${f.filename} with extracted chunks highlighted`}
               />
             </div>
@@ -71,8 +73,8 @@ export function StepChunks({ fixture }: { fixture: ScanFixture }) {
         })}
 
         {skipped.map((f) => (
-          <div key={f.filename} style={{ ...glass, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', opacity: 0.8 }}>
-            <Ban size={14} color={TOKENS.textTertiary} aria-hidden />
+          <div key={f.filename} className="file-block" style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', opacity: 0.8, paddingTop: 12, borderTop: `1px solid ${TOKENS.surfaceBorder}` }}>
+            <Ban size={14} color={TOKENS.textTertiary} aria-hidden style={{ alignSelf: 'center' }} />
             <code style={{ fontSize: 13 }}>{f.filename}</code>
             <span style={{ fontSize: 12.5, color: TOKENS.textTertiary }}>skipped — {f.language === 'unknown' ? 'unsupported language' : 'nothing added'} · 0 of {sourceLines(f.source).length} lines sent</span>
           </div>
@@ -85,8 +87,8 @@ export function StepChunks({ fixture }: { fixture: ScanFixture }) {
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div>
-      <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.01em', fontFamily: TOKENS.fontMono, lineHeight: 1.1 }}>{value}</div>
-      <div style={{ fontSize: 11.5, color: TOKENS.textTertiary, marginTop: 2 }}>{label}</div>
+      <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-0.01em', fontFamily: TOKENS.fontMono, lineHeight: 1.1, color: TOKENS.textPrimary }}>{value}</div>
+      <div style={{ fontSize: 11.5, color: TOKENS.textTertiary, marginTop: 3 }}>{label}</div>
     </div>
   )
 }

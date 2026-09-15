@@ -7,7 +7,7 @@ import { SeverityBadge } from '@/components/ui/severity-badge'
 import type { ScanFixture } from '@/lib/fixtures'
 import { allChunks, findingsForChunk } from '@/lib/fixtures'
 import { confidencePct } from '@/lib/github'
-import { TOKENS, glass } from '@/lib/tokens'
+import { TOKENS } from '@/lib/tokens'
 import { StepIntro } from './step-intro'
 
 interface Props {
@@ -43,8 +43,8 @@ export function StepReview({ fixture, progress, setProgress }: Props) {
         title="Review"
         body="Each chunk went to Claude as one request: the function body, its language, and the list of changed line numbers. The delay below is simulated — the responses are the recorded ones."
         aside={
-          <div style={{ ...glass, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-            <div role="status" aria-live="polite" style={{ fontSize: 13, color: TOKENS.textSecondary }}>
+          <>
+            <div role="status" aria-live="polite">
               <strong style={{ color: TOKENS.textPrimary, fontFamily: TOKENS.fontMono }}>{progress} / {total}</strong> LLM calls complete
               {done ? ` · ${findingsSoFar} finding${findingsSoFar === 1 ? '' : 's'}` : ''}
             </div>
@@ -53,11 +53,11 @@ export function StepReview({ fixture, progress, setProgress }: Props) {
                 <FastForward size={13} aria-hidden /> Skip animation
               </button>
             )}
-          </div>
+          </>
         }
       />
 
-      <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <ol className="review-list">
         {items.map(({ file, chunk }, i) => {
           const state = i < progress ? 'done' : i === progress ? 'active' : 'queued'
           const found = state === 'done' ? findingsForChunk(fixture, file, chunk) : []
@@ -65,7 +65,8 @@ export function StepReview({ fixture, progress, setProgress }: Props) {
             <li
               key={`${file.filename}:${chunk.function_name}:${chunk.start_line}`}
               aria-current={state === 'active' ? 'step' : undefined}
-              style={{ ...glass, padding: '12px 14px', opacity: state === 'queued' ? 0.45 : 1, transition: 'opacity 0.2s ease-out', borderColor: state === 'active' ? TOKENS.accentBorder : TOKENS.surfaceBorder }}
+              className="review-row"
+              data-state={state}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                 {state === 'active' && <span className="spinner" aria-hidden />}

@@ -32,6 +32,8 @@ interface Props {
    * Undefined = show every line.
    */
   foldContext?: number
+  /** Wrap long lines instead of scrolling horizontally (landing-page exhibits). */
+  wrapLines?: boolean
   maxHeight?: number
   style?: CSSProperties
   ariaLabel?: string
@@ -41,7 +43,7 @@ const CELL: CSSProperties = { padding: '0 10px', fontSize: 12.5, lineHeight: '22
 
 export function SourceView({
   source, lang, chunks = [], changedLines = [], pins = [], range, dimOpacity = 0.35, dimAll = false,
-  showChunkLabels = true, foldContext, maxHeight, style, ariaLabel,
+  showChunkLabels = true, foldContext, wrapLines = false, maxHeight, style, ariaLabel,
 }: Props) {
   const lines = sourceLines(source)
   const from = range ? Math.max(1, range[0]) : 1
@@ -120,7 +122,7 @@ export function SourceView({
           {n}
         </td>
         <td aria-hidden style={{ ...CELL, width: 4, minWidth: 4, padding: 0, background: isChanged ? TOKENS.accent : 'transparent' }} />
-        <td style={{ ...CELL, color: TOKENS.textPrimary, fontFamily: TOKENS.fontMono, width: '100%' }}>
+        <td style={{ ...CELL, color: TOKENS.textPrimary, fontFamily: TOKENS.fontMono, width: '100%', ...(wrapLines ? { whiteSpace: 'pre-wrap', wordBreak: 'break-word' } : {}) }}>
           <CodeTokens line={lines[n - 1] ?? ''} lang={lang} />
         </td>
       </tr>,

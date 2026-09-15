@@ -54,13 +54,27 @@ export const glass: CSSProperties = {
   borderRadius: 12,
 }
 
-/** Small uppercase label style (section eyebrows, table headers). */
-export const eyebrow: CSSProperties = {
+/**
+ * Small mono label (section markers, table headers, captions). Mono rather
+ * than sans so labels read as annotations on the page, not as headings.
+ */
+export const label: CSSProperties = {
+  fontFamily: TOKENS.fontMono,
   fontSize: 11,
-  fontWeight: 600,
-  letterSpacing: '0.08em',
+  fontWeight: 500,
+  letterSpacing: '0.06em',
   textTransform: 'uppercase',
   color: TOKENS.textTertiary,
+}
+
+/** @deprecated alias kept for older call sites; same style as `label`. */
+export const eyebrow: CSSProperties = label
+
+/** Bare code surface: raised background, hairline, no glass or shadow. */
+export const codeSurface: CSSProperties = {
+  background: TOKENS.bgRaised,
+  border: `1px solid ${TOKENS.surfaceBorder}`,
+  borderRadius: 8,
 }
 
 export const mono: CSSProperties = { fontFamily: TOKENS.fontMono }
