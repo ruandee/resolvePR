@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { Bot, Braces, GitPullRequest, MessageSquareCheck } from 'lucide-react'
 import { CheckRun } from '@/components/check-run'
 import { CopyButton } from '@/components/copy-button'
 import { GithubComment } from '@/components/github-comment'
@@ -14,10 +15,10 @@ const heroFinding = vulnFixture.findings.find((finding) => finding.cwe === 'CWE-
 const beforeLine = (fileName: string, line: number) => sourceLine(vulnFixture.pr.files.find((file) => file.filename === fileName)?.source ?? '', line)
 
 const STEPS = [
-  ['PR opened', 'A GitHub Action runs on every pull_request event with your own Anthropic key. Nothing to install on your machine.'],
-  ['tree-sitter extracts the touched functions', 'Each changed file is parsed into an AST. Only the functions containing added lines are extracted.'],
-  ['Claude reviews each function', 'Every function goes to Claude with its changed lines marked. Back comes a CWE, severity, fix patch, and confidence.'],
-  ['Inline suggestion + check run', 'Findings at or above 87% confidence become review comments, with a check run summarising the PR.'],
+  { title: 'PR opened', body: 'A GitHub Action runs on every pull_request event with your own Anthropic key. Nothing to install on your machine.', label: 'Trigger', icon: GitPullRequest },
+  { title: 'tree-sitter extracts the touched functions', body: 'Each changed file is parsed into an AST. Only the functions containing added lines are extracted.', label: 'Scope', icon: Braces },
+  { title: 'Claude reviews each function', body: 'Every function goes to Claude with its changed lines marked. Back comes a CWE, severity, fix patch, and confidence.', label: 'Review', icon: Bot },
+  { title: 'Inline suggestion + check run', body: 'Findings at or above 87% confidence become review comments, with a check run summarising the PR.', label: 'Output', icon: MessageSquareCheck },
 ] as const
 
 function SectionHead({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
@@ -63,10 +64,10 @@ export default function Home() {
         <section className="landing-section steps-section" id="how-it-works">
           <SectionHead eyebrow="How it works" title="Four steps, all inside your pull request" body="One GitHub Action. No agent to install, no dashboard to log into—the review shows up where the code is." />
           <ol className="landing-steps">
-            {STEPS.map(([title, body], index) => (
+            {STEPS.map(({ title, body, label, icon: Icon }, index) => (
               <li key={title}>
                 <div className={`step-pattern pattern-${index + 1}`}><span>/00{index + 1}</span></div>
-                <div className="step-copy"><h3>{title}</h3><p>{body}</p><span>{['Trigger', 'Scope', 'Review', 'Output'][index]} →</span></div>
+                <div className="step-copy"><span className="step-icon"><Icon size={18} strokeWidth={1.8} aria-hidden /></span><h3>{title}</h3><p>{body}</p><span>{label} →</span></div>
               </li>
             ))}
           </ol>
