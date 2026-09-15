@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { ExternalLink, X } from 'lucide-react'
 import type { Finding, FindingStatus } from '@/lib/fixtures'
 import { cweUrl, formatDate } from '@/lib/fixtures'
@@ -22,8 +23,15 @@ const CODE_ROW = { fontFamily: TOKENS.fontMono, fontSize: 12, lineHeight: '20px'
 
 export function FindingDrawer({ finding, before, onClose, onStatus }: Props) {
   if (!finding) return null
+  // Rendered into <body> through a portal: position:fixed is otherwise trapped
+  // by any ancestor with a transform (the step container's entry animation)
+  // or a stacking context (the textured page ground), which clipped the
+  // drawer to the content column and left the site header undimmed.
   // Keyed by id so the slide-in state resets whenever a different finding opens.
-  return <DrawerPanel key={finding.id} finding={finding} before={before} onClose={onClose} onStatus={onStatus} />
+  return createPortal(
+    <DrawerPanel key={finding.id} finding={finding} before={before} onClose={onClose} onStatus={onStatus} />,
+    document.body,
+  )
 }
 
 function DrawerPanel({ finding: f, before, onClose, onStatus }: Props & { finding: Finding }) {

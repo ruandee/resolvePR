@@ -6,7 +6,7 @@ import { TOKENS } from '@/lib/tokens'
 
 export function SiteHeader({ current }: { current: 'home' | 'demo' }) {
   return (
-    <header style={{ position: 'sticky', top: 0, zIndex: 30, background: 'rgba(11,18,32,0.88)', backdropFilter: 'blur(16px) saturate(140%)', WebkitBackdropFilter: 'blur(16px) saturate(140%)' }}>
+    <header className="grain" style={{ position: 'sticky', top: 0, zIndex: 30, background: 'rgba(11,18,32,0.88)', backdropFilter: 'blur(16px) saturate(140%)', WebkitBackdropFilter: 'blur(16px) saturate(140%)' }}>
       <nav className="container-x" aria-label="Site" style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 64 }}>
         <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none', fontWeight: 700, letterSpacing: '-0.01em', minHeight: 40, fontFamily: TOKENS.fontDisplay, fontSize: 16 }}>
           <span aria-hidden style={{ width: 26, height: 26, background: TOKENS.accent, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -30,7 +30,7 @@ export function SiteHeader({ current }: { current: 'home' | 'demo' }) {
 
 export function SiteFooter() {
   return (
-    <footer className="band-base" style={{ padding: '36px 0', color: TOKENS.textTertiary, fontSize: 13 }}>
+    <footer className="band-base grain" style={{ padding: '36px 0', color: TOKENS.textTertiary, fontSize: 13 }}>
       <div className="container-x" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between' }}>
         <span>{BUILT_AT}</span>
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
