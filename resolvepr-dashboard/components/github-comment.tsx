@@ -93,7 +93,7 @@ export function GithubComment({ finding, before, compact = false, style }: Props
               </tbody>
             </table>
           </div>
-          <div style={{ display: 'flex', gap: 8, padding: `10px ${pad}px 12px`, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 8, padding: `10px ${pad}px 12px`, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             <span aria-hidden style={{ ...button, background: GH.green, color: '#fff' }}>Commit suggestion</span>
             <span aria-hidden style={{ ...button, background: GH.btn, color: GH.text }}>Add suggestion to batch</span>
           </div>
