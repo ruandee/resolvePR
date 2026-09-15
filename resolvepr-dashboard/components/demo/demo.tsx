@@ -82,7 +82,7 @@ export function Demo() {
         </p>
       </div>
 
-      <div className="-mx-5 px-5 sm:-mx-8 sm:px-8" style={{ position: 'sticky', top: 64, zIndex: 20, background: 'rgba(11,18,32,0.9)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', paddingBlock: 10 }}>
+      <div className="-mx-5 px-5 sm:-mx-8 sm:px-8" style={{ position: 'sticky', top: 64, zIndex: 20, background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', paddingBlock: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <Stepper step={step} canGo={canGo} onGo={goTo} />
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
