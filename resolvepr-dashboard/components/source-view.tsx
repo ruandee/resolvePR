@@ -80,7 +80,7 @@ export function SourceView({
               style={{
                 padding: '5px 10px', fontSize: 11.5, fontFamily: TOKENS.fontMono, textAlign: 'center',
                 color: TOKENS.textTertiary, background: 'rgba(255,255,255,0.025)',
-                borderTop: `1px dashed ${TOKENS.surfaceBorder}`, borderBottom: `1px dashed ${TOKENS.surfaceBorder}`,
+
                 userSelect: 'none', whiteSpace: 'normal',
               }}
             >
@@ -144,7 +144,7 @@ export function SourceView({
       className="code-scroll"
       role="figure"
       aria-label={ariaLabel}
-      style={{ background: TOKENS.bgRaised, border: `1px solid ${TOKENS.surfaceBorder}`, borderRadius: 10, maxHeight, overflowY: maxHeight ? 'auto' : undefined, ...style }}
+      style={{ background: TOKENS.bgRaised, maxHeight, overflowY: maxHeight ? 'auto' : undefined, ...style }}
     >
       <table>
         <tbody>{rows}</tbody>
@@ -159,10 +159,10 @@ export function ChunkLabel({ chunk }: { chunk: Chunk }) {
     <span
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 10.5, fontWeight: 600, letterSpacing: '0.02em',
-        padding: '3px 8px', borderRadius: 6, fontFamily: TOKENS.fontMono, whiteSpace: 'nowrap',
+        padding: '3px 8px', fontFamily: TOKENS.fontMono, whiteSpace: 'nowrap',
         background: isWindow ? 'rgba(212,179,59,0.12)' : TOKENS.accentSoft,
         color: isWindow ? TOKENS.severityMedium : TOKENS.accent,
-        border: `1px solid ${isWindow ? 'rgba(212,179,59,0.3)' : TOKENS.accentBorder}`,
+
       }}
     >
       {isWindow ? chunk.function_name : `${chunk.function_name}()`}

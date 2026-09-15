@@ -73,7 +73,7 @@ export function StepChunks({ fixture }: { fixture: ScanFixture }) {
         })}
 
         {skipped.map((f) => (
-          <div key={f.filename} className="file-block" style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', opacity: 0.8, paddingTop: 12, borderTop: `1px solid ${TOKENS.surfaceBorder}` }}>
+          <div key={f.filename} className="file-block" style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', opacity: 0.8, padding: '14px 16px', background: TOKENS.bgRaised }}>
             <Ban size={14} color={TOKENS.textTertiary} aria-hidden style={{ alignSelf: 'center' }} />
             <code style={{ fontSize: 13 }}>{f.filename}</code>
             <span style={{ fontSize: 12.5, color: TOKENS.textTertiary }}>skipped — {f.language === 'unknown' ? 'unsupported language' : 'nothing added'} · 0 of {sourceLines(f.source).length} lines sent</span>

@@ -28,7 +28,7 @@ export function DiffView({ patch, lang, annotations = {}, highlightLines = [], m
       className="code-scroll"
       role="figure"
       aria-label={ariaLabel}
-      style={{ background: TOKENS.bgRaised, border: `1px solid ${TOKENS.surfaceBorder}`, borderRadius: 10, maxHeight, overflowY: maxHeight ? 'auto' : undefined, ...style }}
+      style={{ background: TOKENS.bgRaised, maxHeight, overflowY: maxHeight ? 'auto' : undefined, ...style }}
     >
       <table>
         <tbody>
@@ -67,7 +67,7 @@ export function DiffView({ patch, lang, annotations = {}, highlightLines = [], m
                 </tr>
                 {annotation && (
                   <tr>
-                    <td colSpan={4} style={{ padding: '8px 10px 10px', whiteSpace: 'normal', borderTop: `1px solid ${TOKENS.surfaceBorder}`, borderBottom: `1px solid ${TOKENS.surfaceBorder}`, background: 'rgba(0,0,0,0.18)' }}>
+                    <td colSpan={4} style={{ padding: '10px 10px 12px', whiteSpace: 'normal', background: 'rgba(0,0,0,0.22)' }}>
                       {annotation}
                     </td>
                   </tr>

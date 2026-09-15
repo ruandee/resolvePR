@@ -26,8 +26,9 @@ export const TOKENS = {
   diffAddStrong: '#3FB950',
   diffDel: 'rgba(248,81,73,0.14)',
   diffDelStrong: '#F85149',
-  fontSans: 'var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif',
-  fontMono: 'var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace',
+  fontSans: 'var(--font-plex-sans), "IBM Plex Sans", "Segoe UI", system-ui, sans-serif',
+  fontMono: 'var(--font-plex-mono), "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace',
+  fontDisplay: 'var(--font-bricolage), "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif',
 } as const
 
 export const SEVERITY_STYLE: Record<Severity, { color: string; bg: string; border: string }> = {
@@ -44,14 +45,16 @@ export const STATUS_STYLE: Record<FindingStatus, { bg: string; color: string }> 
   suppressed:   { bg: 'rgba(107,120,145,0.12)', color: TOKENS.textTertiary },
 }
 
-/** Glass surface used by cards, panels and headers. */
+/** A raised surface: one tone up from the page, square, no border. */
 export const glass: CSSProperties = {
-  background: TOKENS.surface,
-  backdropFilter: 'blur(20px) saturate(140%)',
-  WebkitBackdropFilter: 'blur(20px) saturate(140%)',
-  border: `1px solid ${TOKENS.surfaceBorder}`,
-  boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 24px 48px -24px rgba(0,0,0,0.4)',
-  borderRadius: 12,
+  background: TOKENS.bgRaised,
+}
+
+/** Display face for headings and large figures. */
+export const display: CSSProperties = {
+  fontFamily: TOKENS.fontDisplay,
+  fontWeight: 700,
+  letterSpacing: '-0.03em',
 }
 
 /**
@@ -70,11 +73,9 @@ export const label: CSSProperties = {
 /** @deprecated alias kept for older call sites; same style as `label`. */
 export const eyebrow: CSSProperties = label
 
-/** Bare code surface: raised background, hairline, no glass or shadow. */
+/** Bare code surface: raised background, nothing else. */
 export const codeSurface: CSSProperties = {
   background: TOKENS.bgRaised,
-  border: `1px solid ${TOKENS.surfaceBorder}`,
-  borderRadius: 8,
 }
 
 export const mono: CSSProperties = { fontFamily: TOKENS.fontMono }

@@ -72,8 +72,8 @@ export function StepReview({ fixture, progress, setProgress }: Props) {
                 {state === 'active' && <span className="spinner" aria-hidden />}
                 {state === 'done' && (found.length === 0
                   ? <CheckCircle2 size={16} color={TOKENS.severityLow} aria-hidden />
-                  : <span aria-hidden style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(229,72,77,0.15)', border: `2px solid ${TOKENS.severityCritical}`, flexShrink: 0 }} />)}
-                {state === 'queued' && <span aria-hidden style={{ width: 16, height: 16, borderRadius: '50%', border: `2px dashed ${TOKENS.textTertiary}`, flexShrink: 0 }} />}
+                  : <span aria-hidden style={{ width: 14, height: 14, background: TOKENS.severityCritical, flexShrink: 0 }} />)}
+                {state === 'queued' && <span aria-hidden style={{ width: 14, height: 14, background: 'rgba(255,255,255,0.10)', flexShrink: 0 }} />}
                 <span style={{ fontSize: 13.5, color: TOKENS.textPrimary }}>
                   {state === 'active' ? 'Reviewing' : state === 'done' ? 'Reviewed' : 'Queued'}{' '}
                   <code style={{ fontWeight: 600 }}>{chunk.kind === 'window' ? chunk.function_name : `${chunk.function_name}()`}</code>
@@ -93,7 +93,7 @@ export function StepReview({ fixture, progress, setProgress }: Props) {
                   ) : (
                     <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {found.map((f) => (
-                        <li key={f.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: `1px solid ${TOKENS.surfaceBorder}`, flexWrap: 'wrap' }}>
+                        <li key={f.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 10px', background: 'rgba(0,0,0,0.25)', flexWrap: 'wrap' }}>
                           <SeverityBadge severity={f.severity} />
                           <span style={{ fontSize: 12, fontFamily: TOKENS.fontMono, color: TOKENS.accent, paddingTop: 2 }}>{f.cwe}</span>
                           <span style={{ fontSize: 13, color: TOKENS.textPrimary, flex: '1 1 240px', lineHeight: 1.45 }}>{f.summary}</span>

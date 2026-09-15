@@ -25,7 +25,7 @@ interface Props {
 type Tab = 'dashboard' | 'author'
 
 // FileHeader inside the GitHub-styled boxes needs GitHub's own header chrome.
-const GH_HEAD = { padding: '10px 14px', background: '#161b22', borderBottom: '1px solid #30363d' } as const
+const GH_HEAD = { padding: '10px 14px', background: '#21262d' } as const
 
 /** Step 4: the results dashboard and the mock GitHub pull-request view. */
 export function StepResults({ fixture, findings, onStatus, onRestart }: Props) {
@@ -101,16 +101,16 @@ function TabButton({ active, onClick, icon, id, controls, children }: { active: 
 export function AuthorView({ fixture, findings, before }: { fixture: ScanFixture; findings: Finding[]; before: (f: Finding) => string }) {
   const scanned = scannedFiles(fixture)
   const skipped = skippedFiles(fixture)
-  const GH = { bg: '#0d1117', bgSubtle: '#161b22', border: '#30363d', text: '#e6edf3', muted: '#8b949e' }
+  const GH = { bg: '#0d1117', bgSubtle: '#161b22', text: '#e6edf3', muted: '#8b949e' }
 
   return (
-    <div style={{ background: GH.bg, border: `1px solid ${GH.border}`, borderRadius: 10, color: GH.text, overflow: 'hidden' }}>
-      <div style={{ padding: '16px 18px', borderBottom: `1px solid ${GH.border}` }}>
+    <div style={{ background: GH.bg, color: GH.text, overflow: 'hidden' }}>
+      <div style={{ padding: '16px 18px', background: GH.bgSubtle }}>
         <h3 style={{ margin: 0, fontSize: 20, fontWeight: 600, lineHeight: 1.3, letterSpacing: '-0.01em' }}>
           {fixture.pr.title} <span style={{ color: GH.muted, fontWeight: 400 }}>#{fixture.pr.number}</span>
         </h3>
         <p style={{ margin: '8px 0 0', fontSize: 13, color: GH.muted, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 999, background: '#238636', color: '#fff', fontSize: 12, fontWeight: 600 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', background: '#238636', color: '#fff', fontSize: 12, fontWeight: 600 }}>
             <GitPullRequest size={12} aria-hidden /> Open
           </span>
           <span style={{ fontFamily: TOKENS.fontMono }}>{fixture.pr.repo}</span> · {fixture.pr.files.length} files changed · <span style={{ fontFamily: TOKENS.fontMono }}>{fixture.pr.head_sha.slice(0, 7)}</span>
@@ -131,18 +131,18 @@ export function AuthorView({ fixture, findings, before }: { fixture: ScanFixture
             )
           }
           return (
-            <div key={f.filename} style={{ border: `1px solid ${GH.border}`, borderRadius: 8, overflow: 'hidden' }}>
+            <div key={f.filename} style={{ background: GH.bgSubtle, overflow: 'hidden' }}>
               <FileHeader filename={f.filename} status={f.status} language={f.language} style={GH_HEAD} right={<><Changes added={c.added} removed={c.removed} />{fileFindings.length > 0 && <span style={{ fontSize: 12, color: GH.muted }}>{fileFindings.length} comment{fileFindings.length === 1 ? '' : 's'}</span>}</>} />
-              <DiffView patch={f.patch} lang={f.language} annotations={annotations} highlightLines={fileFindings.map((x) => x.line)} style={{ border: 'none', borderRadius: 0, background: GH.bg }} ariaLabel={`Diff of ${f.filename} with review comments`} />
+              <DiffView patch={f.patch} lang={f.language} annotations={annotations} highlightLines={fileFindings.map((x) => x.line)} style={{ background: GH.bgSubtle }} ariaLabel={`Diff of ${f.filename} with review comments`} />
             </div>
           )
         })}
         {skipped.map((f) => {
           const c = countChanges(f.patch)
           return (
-            <div key={f.filename} style={{ border: `1px solid ${GH.border}`, borderRadius: 8, overflow: 'hidden' }}>
+            <div key={f.filename} style={{ background: GH.bgSubtle, overflow: 'hidden' }}>
               <FileHeader filename={f.filename} status={f.status} language={f.language} style={GH_HEAD} right={<><Changes added={c.added} removed={c.removed} /><span style={{ fontSize: 12, color: GH.muted }}>not scanned</span></>} />
-              <DiffView patch={f.patch} lang={f.language} style={{ border: 'none', borderRadius: 0, background: GH.bg }} ariaLabel={`Diff of ${f.filename}`} />
+              <DiffView patch={f.patch} lang={f.language} style={{ background: GH.bgSubtle }} ariaLabel={`Diff of ${f.filename}`} />
             </div>
           )
         })}

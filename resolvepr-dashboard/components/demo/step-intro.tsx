@@ -5,7 +5,7 @@ export function StepIntro({ id, title, body, aside }: { id: string; title: strin
   return (
     <div className="step-intro">
       <div style={{ flex: '1 1 360px', minWidth: 0 }}>
-        <h2 id={id} style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-0.02em', margin: '0 0 8px', lineHeight: 1.2 }}>{title}</h2>
+        <h2 id={id} style={{ fontFamily: TOKENS.fontDisplay, fontSize: 30, fontWeight: 700, letterSpacing: '-0.03em', margin: '0 0 8px', lineHeight: 1.15 }}>{title}</h2>
         <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.6, color: TOKENS.textSecondary, maxWidth: 640 }}>{body}</p>
       </div>
       {aside && <div className="step-aside">{aside}</div>}

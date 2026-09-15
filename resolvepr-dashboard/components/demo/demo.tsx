@@ -75,14 +75,14 @@ export function Demo() {
   return (
     <main className="container-x" style={{ paddingBlock: 24, minHeight: '70vh' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', margin: 0 }}>Demo</h1>
+        <h1 style={{ fontFamily: TOKENS.fontDisplay, fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', margin: 0 }}>Demo</h1>
         <p style={{ margin: 0, fontSize: 12.5, color: TOKENS.textTertiary, display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          <span aria-hidden style={{ width: 7, height: 7, borderRadius: '50%', background: TOKENS.severityMedium, flexShrink: 0 }} />
+          <span aria-hidden style={{ width: 7, height: 7, background: TOKENS.severityMedium, flexShrink: 0 }} />
           Replay of a real scan · {fixture ? fixture.generator : 'pick a pull request below'}
         </p>
       </div>
 
-      <div className="-mx-5 px-5 sm:-mx-8 sm:px-8" style={{ position: 'sticky', top: 56, zIndex: 20, background: 'rgba(11,18,32,0.9)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', paddingBlock: 10, borderBottom: `1px solid ${TOKENS.surfaceBorder}` }}>
+      <div className="-mx-5 px-5 sm:-mx-8 sm:px-8" style={{ position: 'sticky', top: 64, zIndex: 20, background: 'rgba(11,18,32,0.9)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', paddingBlock: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <Stepper step={step} canGo={canGo} onGo={goTo} />
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>

@@ -12,7 +12,7 @@ interface Props {
   style?: CSSProperties
 }
 
-const GH = { bg: '#0d1117', bgSubtle: '#161b22', border: '#30363d', text: '#e6edf3', muted: '#8b949e', green: '#3fb950', red: '#f85149' }
+const GH = { bg: '#0d1117', bgSubtle: '#161b22', text: '#e6edf3', muted: '#8b949e', green: '#3fb950', red: '#f85149' }
 
 /** Mock of the GitHub check run ResolvePR completes (summary from internal/output/checkrun.go). */
 export function CheckRun({ findings, stats, compact = false, style }: Props) {
@@ -22,10 +22,10 @@ export function CheckRun({ findings, stats, compact = false, style }: Props) {
   const duration = stats?.duration_ms !== undefined ? formatDuration(stats.duration_ms) : undefined
 
   return (
-    <section aria-label="Check run" style={{ background: GH.bg, border: `1px solid ${GH.border}`, borderRadius: 8, color: GH.text, fontSize: compact ? 13 : 14, overflow: 'hidden', ...style }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: 10, padding: compact ? '10px 12px' : '12px 16px', background: GH.bgSubtle, borderBottom: `1px solid ${GH.border}`, flexWrap: 'wrap' }}>
+    <section aria-label="Check run" style={{ background: GH.bg, color: GH.text, fontSize: compact ? 13 : 14, overflow: 'hidden', fontFamily: TOKENS.fontSans, ...style }}>
+      <header style={{ display: 'flex', alignItems: 'center', gap: 10, padding: compact ? '10px 12px' : '12px 16px', background: GH.bgSubtle, flexWrap: 'wrap' }}>
         {ok ? <CheckCircle2 size={18} color={GH.green} aria-hidden /> : <XCircle size={18} color={GH.red} aria-hidden />}
-        <span aria-hidden style={{ width: 20, height: 20, borderRadius: 5, background: TOKENS.accent, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span aria-hidden style={{ width: 20, height: 20, background: TOKENS.accent, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <ShieldCheck size={13} strokeWidth={2} color={TOKENS.bgBase} />
         </span>
         <strong style={{ fontWeight: 600 }}>ResolvePR</strong>
@@ -40,20 +40,20 @@ export function CheckRun({ findings, stats, compact = false, style }: Props) {
           <p style={{ margin: 0 }}>{NO_ISSUES_SUMMARY}</p>
         ) : (
           <>
-            <h2 style={{ margin: '0 0 12px', fontSize: compact ? 16 : 18, fontWeight: 600, paddingBottom: 8, borderBottom: `1px solid ${GH.border}` }}>
+            <h2 style={{ margin: '0 0 12px', fontSize: compact ? 16 : 18, fontWeight: 600 }}>
               ResolvePR found {findings.length} issues
             </h2>
             <div className="code-scroll" style={{ marginBottom: 12 }}>
               <table style={{ borderCollapse: 'collapse', fontSize: 13, minWidth: 0 }}>
                 <thead>
-                  <tr>
-                    <th style={{ ...TH }}>Severity</th>
-                    <th style={{ ...TH }}>Count</th>
+                  <tr style={{ background: GH.bgSubtle }}>
+                    <th style={TH}>Severity</th>
+                    <th style={TH}>Count</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'] as const).map((s) => (
-                    <tr key={s}>
+                  {(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'] as const).map((s, i) => (
+                    <tr key={s} style={{ background: i % 2 ? 'rgba(255,255,255,0.03)' : 'transparent' }}>
                       <td style={TD}><span aria-hidden>{SEVERITY_EMOJI[s]} </span>{s}</td>
                       <td style={TD}>{counts[s]}</td>
                     </tr>
@@ -61,8 +61,7 @@ export function CheckRun({ findings, stats, compact = false, style }: Props) {
                 </tbody>
               </table>
             </div>
-            <p style={{ margin: '0 0 12px' }}>See inline review comments below for details on each finding and suggested fixes.</p>
-            <hr style={{ border: 0, borderTop: `1px solid ${GH.border}`, margin: '0 0 10px' }} />
+            <p style={{ margin: '0 0 10px' }}>See inline review comments below for details on each finding and suggested fixes.</p>
           </>
         )}
         {findings.length > 0 && <sub style={{ fontSize: 11, color: GH.muted }}>Powered by Claude · AST-aware chunking</sub>}
@@ -71,5 +70,5 @@ export function CheckRun({ findings, stats, compact = false, style }: Props) {
   )
 }
 
-const TH: CSSProperties = { textAlign: 'left', padding: '6px 13px', border: '1px solid #30363d', fontWeight: 600, background: '#161b22' }
-const TD: CSSProperties = { padding: '6px 13px', border: '1px solid #30363d' }
+const TH: CSSProperties = { textAlign: 'left', padding: '6px 13px', fontWeight: 600 }
+const TD: CSSProperties = { padding: '6px 13px' }

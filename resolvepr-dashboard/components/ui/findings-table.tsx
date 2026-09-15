@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { Search, X } from 'lucide-react'
 import type { Finding, Severity } from '@/lib/fixtures'
 import { SEVERITY_ORDER, severityRank } from '@/lib/fixtures'
-import { SEVERITY_STYLE, STATUS_STYLE, TOKENS, codeSurface, eyebrow } from '@/lib/tokens'
+import { SEVERITY_STYLE, STATUS_STYLE, TOKENS, eyebrow } from '@/lib/tokens'
 import { SeverityBadge } from './severity-badge'
 
 interface Props {
@@ -19,8 +19,8 @@ function ConfBar({ value }: { value: number }) {
   const pct = Math.round(value * 100)
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-      <div aria-hidden style={{ width: 40, height: 3, borderRadius: 99, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-        <div style={{ width: `${pct}%`, height: '100%', borderRadius: 99, background: TOKENS.accent }} />
+      <div aria-hidden style={{ width: 40, height: 3, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+        <div style={{ width: `${pct}%`, height: '100%', background: TOKENS.accent }} />
       </div>
       <span style={{ fontSize: 11, color: TOKENS.textSecondary }}>{pct}%</span>
     </div>
@@ -44,7 +44,7 @@ export function FindingsTable({ findings, onSelect, selectedId }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.04)', border: `1px solid ${query ? TOKENS.accentBorder : TOKENS.surfaceBorder}`, borderRadius: 8, padding: '0 10px', flex: '1 1 180px', maxWidth: 300, height: 40 }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, background: query ? TOKENS.accentSoft : TOKENS.bgRaised, padding: '0 10px', flex: '1 1 180px', maxWidth: 300, height: 40 }}>
           <Search size={13} strokeWidth={1.5} color={TOKENS.textTertiary} aria-hidden />
           <span className="sr-only">Search findings</span>
           <input
@@ -71,7 +71,7 @@ export function FindingsTable({ findings, onSelect, selectedId }: Props) {
                 onClick={() => setSev(o)}
                 aria-pressed={active}
                 className="btn btn-sm"
-                style={{ minHeight: 40, background: active ? c.bg : 'transparent', color: active ? c.color : TOKENS.textTertiary, border: `1px solid ${active ? c.border : 'transparent'}`, fontWeight: active ? 600 : 500 }}
+                style={{ minHeight: 40, background: active ? c.bg : 'transparent', color: active ? c.color : TOKENS.textTertiary, fontWeight: active ? 600 : 500 }}
               >
                 {o === 'all' ? 'All' : o.charAt(0) + o.slice(1).toLowerCase()}
               </button>
@@ -84,10 +84,10 @@ export function FindingsTable({ findings, onSelect, selectedId }: Props) {
         </span>
       </div>
 
-      <div className="code-scroll" style={{ ...codeSurface, overflow: 'auto' }}>
+      <div className="code-scroll" style={{ overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
           <thead>
-            <tr style={{ borderBottom: `1px solid ${TOKENS.surfaceBorder}`, background: 'rgba(255,255,255,0.02)' }}>
+            <tr style={{ background: TOKENS.bgRaised }}>
               {['Severity', 'Finding', 'File', 'Confidence', 'Status'].map((h) => (
                 <th key={h} scope="col" style={{ ...eyebrow, padding: '10px 14px', textAlign: 'left', whiteSpace: 'nowrap', fontSize: 10 }}>{h}</th>
               ))}
@@ -112,9 +112,9 @@ export function FindingsTable({ findings, onSelect, selectedId }: Props) {
                   onClick={() => onSelect(f)}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(f) } }}
                   style={{
-                    borderBottom: i < rows.length - 1 ? `1px solid ${TOKENS.surfaceBorder}` : 'none',
+                    // zebra rows carry the separation; no rules
                     cursor: 'pointer', height: 48,
-                    background: selected ? TOKENS.accentSoft : 'transparent',
+                    background: selected ? TOKENS.accentSoft : i % 2 ? TOKENS.bgRaised : 'transparent',
                     opacity: f.status === 'suppressed' ? 0.55 : 1,
                   }}
                 >
@@ -126,7 +126,7 @@ export function FindingsTable({ findings, onSelect, selectedId }: Props) {
                   <td style={{ padding: '0 14px', fontSize: 11, fontFamily: TOKENS.fontMono, color: TOKENS.textSecondary, whiteSpace: 'nowrap' }}>{f.file}:{f.line}</td>
                   <td style={{ padding: '0 14px' }}><ConfBar value={f.confidence} /></td>
                   <td style={{ padding: '0 14px', whiteSpace: 'nowrap' }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.04em', ...STATUS_STYLE[f.status] }}>{f.status}</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 8px', fontFamily: TOKENS.fontMono, textTransform: 'uppercase', letterSpacing: '0.04em', ...STATUS_STYLE[f.status] }}>{f.status}</span>
                   </td>
                 </tr>
               )

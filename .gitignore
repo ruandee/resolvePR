@@ -18,3 +18,5 @@ test.txt
 *.tsbuildinfo
 # agent briefs (local working docs)
 .claude/briefs/
+# design canvas working files
+.claude/design/

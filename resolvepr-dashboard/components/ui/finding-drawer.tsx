@@ -5,7 +5,7 @@ import { ExternalLink, X } from 'lucide-react'
 import type { Finding, FindingStatus } from '@/lib/fixtures'
 import { cweUrl, formatDate } from '@/lib/fixtures'
 import { confidencePct } from '@/lib/github'
-import { STATUS_STYLE, TOKENS, eyebrow } from '@/lib/tokens'
+import { STATUS_STYLE, TOKENS, label } from '@/lib/tokens'
 import { CopyButton } from '@/components/copy-button'
 import { SeverityBadge } from './severity-badge'
 
@@ -56,25 +56,24 @@ function DrawerPanel({ finding: f, before, onClose, onStatus }: Props & { findin
         className="w-full sm:w-[520px]"
         style={{
           position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 50, display: 'flex', flexDirection: 'column',
-          background: TOKENS.surfaceCard, backdropFilter: 'blur(20px) saturate(140%)', WebkitBackdropFilter: 'blur(20px) saturate(140%)',
-          borderLeft: `1px solid ${TOKENS.surfaceBorder}`, boxShadow: '-24px 0 64px rgba(0,0,0,0.5)',
+          background: TOKENS.bgBase, boxShadow: '-24px 0 64px rgba(0,0,0,0.5)',
           transform: visible ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.18s ease-out',
         }}
       >
-        <div style={{ minHeight: 56, padding: '10px 16px', borderBottom: `1px solid ${TOKENS.surfaceBorder}`, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ minHeight: 56, padding: '10px 16px', background: TOKENS.bgRaised, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: TOKENS.textTertiary, fontFamily: TOKENS.fontMono }}>{f.id}</span>
-          <a href={cweUrl(f.cwe)} target="_blank" rel="noreferrer" style={{ fontSize: 11, fontWeight: 600, color: TOKENS.accent, background: TOKENS.accentSoft, padding: '3px 7px', borderRadius: 4, fontFamily: TOKENS.fontMono, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <a href={cweUrl(f.cwe)} target="_blank" rel="noreferrer" style={{ fontSize: 11, fontWeight: 600, color: TOKENS.accent, background: TOKENS.accentSoft, padding: '3px 7px', fontFamily: TOKENS.fontMono, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
             {f.cwe} <ExternalLink size={10} aria-hidden />
           </a>
           <SeverityBadge severity={f.severity} />
-          <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.04em', ...st }}>{f.status}</span>
-          <button type="button" onClick={onClose} aria-label="Close" className="btn btn-ghost" style={{ marginLeft: 'auto', width: 40, height: 40, padding: 0, borderRadius: 8 }}>
+          <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 8px', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: TOKENS.fontMono, ...st }}>{f.status}</span>
+          <button type="button" onClick={onClose} aria-label="Close" className="btn btn-ghost" style={{ marginLeft: 'auto', width: 40, height: 40, padding: 0 }}>
             <X size={16} strokeWidth={1.75} />
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <h2 id="finding-title" style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.45, margin: 0, color: TOKENS.textPrimary }}>{f.summary}</h2>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <h2 id="finding-title" style={{ fontFamily: TOKENS.fontDisplay, fontSize: 18, fontWeight: 600, lineHeight: 1.35, letterSpacing: '-0.01em', margin: 0, color: TOKENS.textPrimary }}>{f.summary}</h2>
 
           <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8, margin: 0 }}>
             {[
@@ -84,24 +83,24 @@ function DrawerPanel({ finding: f, before, onClose, onStatus }: Props & { findin
               { l: 'Pull request', v: `${f.repo}#${f.pr}` },
               { l: 'Reported', v: formatDate(f.created_at) },
             ].map(({ l, v, mono }) => (
-              <div key={l} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${TOKENS.surfaceBorder}`, borderRadius: 6, padding: '8px 10px', minWidth: 0 }}>
-                <dt style={{ ...eyebrow, fontSize: 9, marginBottom: 4 }}>{l}</dt>
+              <div key={l} style={{ background: TOKENS.bgRaised, padding: '8px 10px', minWidth: 0 }}>
+                <dt style={{ ...label, fontSize: 9.5, marginBottom: 4 }}>{l}</dt>
                 <dd style={{ margin: 0, fontSize: 12, fontWeight: 600, color: TOKENS.textPrimary, fontFamily: mono ? TOKENS.fontMono : undefined, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</dd>
               </div>
             ))}
           </dl>
 
           <section>
-            <h3 style={{ ...eyebrow, marginBottom: 8 }}>Why it matters</h3>
+            <h3 style={{ ...label, marginBottom: 8 }}>Why it matters</h3>
             <p style={{ fontSize: 13, color: TOKENS.textSecondary, lineHeight: 1.6, margin: 0 }}>{f.why_it_matters}</p>
           </section>
 
           <section>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, gap: 8 }}>
-              <h3 style={{ ...eyebrow, margin: 0 }}>Suggested fix</h3>
+              <h3 style={{ ...label, margin: 0 }}>Suggested fix</h3>
               <CopyButton text={f.fix_patch} label="Copy fix" />
             </div>
-            <div className="code-scroll" style={{ background: TOKENS.bgRaised, border: `1px solid ${TOKENS.surfaceBorder}`, borderRadius: 8 }}>
+            <div className="code-scroll" style={{ background: TOKENS.bgRaised }}>
               <table style={{ width: '100%' }}>
                 <tbody>
                   <tr style={{ background: TOKENS.diffDel }}>
@@ -122,10 +121,10 @@ function DrawerPanel({ finding: f, before, onClose, onStatus }: Props & { findin
           </section>
 
           <section>
-            <h3 style={{ ...eyebrow, marginBottom: 8 }}>Confidence</h3>
+            <h3 style={{ ...label, marginBottom: 8 }}>Confidence</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div aria-hidden style={{ flex: 1, height: 6, borderRadius: 99, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-                <div style={{ width: `${confidencePct(f)}%`, height: '100%', background: TOKENS.accent, borderRadius: 99 }} />
+              <div aria-hidden style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                <div style={{ width: `${confidencePct(f)}%`, height: '100%', background: TOKENS.accent }} />
               </div>
               <span style={{ fontSize: 13, fontWeight: 600, fontFamily: TOKENS.fontMono }}>{confidencePct(f)}%</span>
             </div>
@@ -133,7 +132,7 @@ function DrawerPanel({ finding: f, before, onClose, onStatus }: Props & { findin
           </section>
         </div>
 
-        <div style={{ borderTop: `1px solid ${TOKENS.surfaceBorder}`, padding: '12px 16px', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ background: TOKENS.bgRaised, padding: '12px 16px', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {f.status === 'open' ? (
             <>
               <button type="button" className="btn btn-secondary" style={{ flex: 1, color: TOKENS.severityHigh }} onClick={() => onStatus(f.id, 'acknowledged')}>Acknowledge</button>
@@ -144,7 +143,7 @@ function DrawerPanel({ finding: f, before, onClose, onStatus }: Props & { findin
             <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => onStatus(f.id, 'open')}>Reopen</button>
           )}
         </div>
-        <p style={{ margin: 0, padding: '0 16px 10px', fontSize: 11, color: TOKENS.textTertiary }}>Status changes are local to this replay and are not saved anywhere.</p>
+        <p style={{ margin: 0, padding: '10px 16px', background: TOKENS.bgRaised, fontSize: 11, color: TOKENS.textTertiary }}>Status changes are local to this replay and are not saved anywhere.</p>
       </aside>
     </>
   )
