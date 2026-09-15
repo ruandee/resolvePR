@@ -73,7 +73,7 @@ export function Demo() {
   const setStatus = useCallback((id: string, status: FindingStatus) => setStatuses((s) => ({ ...s, [id]: status })), [])
 
   return (
-    <main className="container-x" style={{ paddingBlock: 24, minHeight: '70vh' }}>
+    <main className="container-x" style={{ padding: '112px 0 24px', minHeight: '70vh' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
         <h1 style={{ fontFamily: TOKENS.fontDisplay, fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', margin: 0 }}>Demo</h1>
         <p style={{ margin: 0, fontSize: 12.5, color: TOKENS.textTertiary, display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
