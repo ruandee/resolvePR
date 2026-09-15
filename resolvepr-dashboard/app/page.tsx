@@ -2,6 +2,7 @@ import { Bot, Braces, GitPullRequest, MessageSquareCheck } from 'lucide-react'
 import { CheckRun } from '@/components/check-run'
 import { CopyButton } from '@/components/copy-button'
 import { GithubComment } from '@/components/github-comment'
+import { HyperspaceTransition } from '@/components/hyperspace-transition'
 import { LandingDemoPeek } from '@/components/landing-demo-peek'
 import { ScrollReveal } from '@/components/scroll-reveal'
 import { SiteFooter, SiteHeader } from '@/components/site-chrome'
@@ -50,6 +51,8 @@ export default function Home() {
           <SectionHead eyebrow="Inside the pull request" title="The finding arrives ready to act on." body="The existing GitHub comment stays exact. The redesign makes it the proof object instead of treating it like another dashboard card." />
           <div className="proof-card"><GithubComment finding={heroFinding} before={beforeLine(heroFinding.file, heroFinding.line)} compact /></div>
         </ScrollReveal>
+
+        <HyperspaceTransition />
 
         <ScrollReveal className="landing-section steps-section" id="how-it-works">
           <SectionHead eyebrow="How it works" title="Four steps, all inside your pull request" body="One GitHub Action. No agent to install, no dashboard to log into—the review shows up where the code is." />
