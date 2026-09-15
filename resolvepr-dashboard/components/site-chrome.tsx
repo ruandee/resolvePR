@@ -1,27 +1,48 @@
+'use client'
+
+import Image from 'next/image'
 import Link from 'next/link'
-import { ShieldCheck } from 'lucide-react'
+import { useState } from 'react'
 import { GithubMark } from './github-mark'
 import { BUILT_AT, REPO_URL, SITE_NAME } from '@/lib/site'
-import { TOKENS } from '@/lib/tokens'
 
 export function SiteHeader({ current }: { current: 'home' | 'demo' }) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [contactOpen, setContactOpen] = useState(false)
+
   return (
-    <header className="grain" style={{ position: 'sticky', top: 0, zIndex: 30, background: 'rgba(11,18,32,0.88)', backdropFilter: 'blur(16px) saturate(140%)', WebkitBackdropFilter: 'blur(16px) saturate(140%)' }}>
-      <nav className="container-x" aria-label="Site" style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 64 }}>
-        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none', fontWeight: 700, letterSpacing: '-0.01em', minHeight: 40, fontFamily: TOKENS.fontDisplay, fontSize: 16 }}>
-          <span aria-hidden style={{ width: 26, height: 26, background: TOKENS.accent, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ShieldCheck size={16} strokeWidth={2.2} color={TOKENS.bgBase} />
-          </span>
-          {SITE_NAME}
+    <header className={`bubble-header ${menuOpen ? 'is-open' : ''}`}>
+      <nav className="bubble-nav" aria-label="Site">
+        <Link href="/" className="bubble-brand">
+          <Image src="/resolvepr-shield.svg" alt="" width={31} height={31} priority />
+          <span>{SITE_NAME}</span>
         </Link>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
-          <Link href="/demo" className={`btn btn-sm ${current === 'demo' ? 'btn-secondary' : 'btn-ghost'}`} aria-current={current === 'demo' ? 'page' : undefined} style={{ minHeight: 40 }}>
-            Demo
-          </Link>
-          <a href={REPO_URL} className="btn btn-ghost btn-sm" target="_blank" rel="noreferrer" style={{ minHeight: 40 }}>
-            <GithubMark size={15} />
-            <span>GitHub</span>
-          </a>
+
+        <button className="bubble-control bubble-menu" type="button" aria-expanded={menuOpen} aria-controls="bubble-panel" onClick={() => setMenuOpen((open) => !open)}>
+          {menuOpen ? 'Close ↑' : 'Menu ↘'}
+        </button>
+
+        <div className={`bubble-contact ${contactOpen ? 'is-open' : ''}`}>
+          <button className="bubble-control contact-trigger" type="button" aria-expanded={contactOpen} onClick={() => setContactOpen((open) => !open)}>
+            Contact ↗
+          </button>
+          <div className="contact-menu">
+            <Link href="/demo" aria-current={current === 'demo' ? 'page' : undefined}>View demo <span>→</span></Link>
+            <a href={REPO_URL} target="_blank" rel="noreferrer">GitHub <span>↗</span></a>
+          </div>
+        </div>
+
+        <div className="bubble-panel" id="bubble-panel">
+          <div>
+            <p className="bubble-kicker">Navigation</p>
+            <p className="bubble-note">Everything stays on one focused page. Jump directly to the part you need.</p>
+          </div>
+          <div className="bubble-links">
+            <Link href="/#how-it-works">How it works <span>01</span></Link>
+            <Link href="/#why-ast">Why AST <span>02</span></Link>
+            <Link href="/#what-you-get">What you get <span>03</span></Link>
+            <Link href="/#try-it">Install <span>04</span></Link>
+          </div>
         </div>
       </nav>
     </header>
@@ -30,16 +51,12 @@ export function SiteHeader({ current }: { current: 'home' | 'demo' }) {
 
 export function SiteFooter() {
   return (
-    <footer className="band-base grain" style={{ padding: '36px 0', color: TOKENS.textTertiary, fontSize: 13 }}>
-      <div className="container-x" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between' }}>
-        <span>{BUILT_AT}</span>
-        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-          <Link href="/demo" style={{ color: TOKENS.textSecondary, textDecoration: 'none', minHeight: 40, display: 'inline-flex', alignItems: 'center' }}>Demo</Link>
-          <a href={REPO_URL} target="_blank" rel="noreferrer" style={{ color: TOKENS.textSecondary, textDecoration: 'none', minHeight: 40, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <GithubMark size={14} /> Repository
-          </a>
-        </div>
-      </div>
+    <footer className="site-footer">
+      <span>{BUILT_AT}</span>
+      <span className="footer-links">
+        <Link href="/demo">Demo</Link>
+        <a href={REPO_URL} target="_blank" rel="noreferrer"><GithubMark size={14} /> Repository</a>
+      </span>
     </footer>
   )
 }
