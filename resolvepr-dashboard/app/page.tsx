@@ -1,8 +1,8 @@
-import Image from 'next/image'
 import { Bot, Braces, GitPullRequest, MessageSquareCheck } from 'lucide-react'
 import { CheckRun } from '@/components/check-run'
 import { CopyButton } from '@/components/copy-button'
 import { GithubComment } from '@/components/github-comment'
+import { LandingDemoPeek } from '@/components/landing-demo-peek'
 import { ScrollReveal } from '@/components/scroll-reveal'
 import { SiteFooter, SiteHeader } from '@/components/site-chrome'
 import { SourceView } from '@/components/source-view'
@@ -43,18 +43,7 @@ export default function Home() {
             <p>{SITE_NAME} brings focused security findings, inline suggestions, and a check run directly into GitHub.</p>
           </div>
 
-          <div className="demo-peek" aria-label="Preview of the ResolvePR demo">
-            <div className="peek-toolbar">
-              <Image src="/resolvepr-shield.svg" alt="" width={24} height={24} />
-              <strong>ResolvePR demo</strong>
-              <span className="peek-repo">acme/payments #142</span>
-              <div className="peek-steps" aria-hidden><span>01 Diff</span><span>02 Functions</span><span className="active">03 Review</span><span>04 Results</span></div>
-            </div>
-            <div className="peek-grid">
-              <pre><span>81  func transfer(amount int, to string) {'{'}</span>{'\n'}<mark>82    db.Exec(&quot;UPDATE accounts &quot; + amount)</mark>{'\n'}<span>83    notify(to)</span>{'\n'}<span>84  {'}'}</span></pre>
-              <div className="peek-finding"><span>CRITICAL · CWE-89 · 99%</span><h3>SQL query construction includes untrusted input.</h3><p>ResolvePR pins the finding to the changed line and prepares an inline suggestion.</p></div>
-            </div>
-          </div>
+          <LandingDemoPeek />
         </section>
 
         <ScrollReveal className="landing-section proof-section" id="what-you-get">
