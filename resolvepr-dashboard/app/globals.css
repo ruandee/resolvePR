@@ -263,7 +263,7 @@
 .bubble-contributors[open] summary span { transform: rotate(45deg); }
 .contributors-menu { display: flex; gap: 8px; max-height: 0; overflow: hidden; padding: 0 8px; opacity: 0; transition: max-height .28s ease, opacity .2s ease, padding .28s ease; }
 .bubble-contributors[open] .contributors-menu { max-height: 90px; padding-bottom: 8px; opacity: 1; }
-.contributors-menu a { flex: 1; border: 1px solid rgba(0,0,0,.12); border-bottom: 0; }
+.contributors-menu a { flex: 1; border: 1px solid rgba(0,0,0,.12); }
 
 .landing-hero { position: relative; min-height: 1160px; background: radial-gradient(circle at 50% 40%, rgba(255,255,255,.055), transparent 30%), linear-gradient(120deg,#020202,#090909 48%,#000); }
 .hero-copy { max-width: 980px; margin: 0 auto; padding: 235px 24px 0; text-align: center; }
