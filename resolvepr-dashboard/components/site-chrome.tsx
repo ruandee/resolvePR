@@ -42,6 +42,13 @@ export function SiteHeader({ current }: { current: 'home' | 'demo' }) {
             <Link href="/#why-ast">Why AST <span>02</span></Link>
             <Link href="/#what-you-get">What you get <span>03</span></Link>
             <Link href="/#try-it">Install <span>04</span></Link>
+            <details className="bubble-contributors">
+              <summary>Contributors <span>+</span></summary>
+              <div className="contributors-menu">
+                <a href="https://www.linkedin.com/in/deeruan/" target="_blank" rel="noreferrer">Dee Ruan <span>↗</span></a>
+                <a href="https://www.linkedin.com/in/marcus-prgin/" target="_blank" rel="noreferrer">Marcus Prgin <span>↗</span></a>
+              </div>
+            </details>
           </div>
         </div>
       </nav>

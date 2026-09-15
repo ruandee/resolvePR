@@ -254,6 +254,12 @@
 .bubble-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .bubble-links a { display: flex; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid rgba(0,0,0,.12); color: #101010; font-weight: 600; text-decoration: none; }
 .bubble-links a:hover { color: #315fc8; }
+.bubble-contributors { grid-column: 1 / -1; border-top: 1px solid rgba(0,0,0,.12); }
+.bubble-contributors summary { display: flex; justify-content: space-between; padding: 14px 16px; color: #101010; cursor: pointer; font-weight: 600; list-style: none; }
+.bubble-contributors summary::-webkit-details-marker { display: none; }
+.bubble-contributors summary:hover { color: #315fc8; }
+.contributors-menu { display: flex; gap: 8px; padding: 0 8px 8px; }
+.contributors-menu a { flex: 1; border: 1px solid rgba(0,0,0,.12); border-bottom: 0; }
 
 .landing-hero { position: relative; min-height: 940px; overflow: hidden; background: radial-gradient(circle at 50% 40%, rgba(255,255,255,.055), transparent 30%), linear-gradient(120deg,#020202,#090909 48%,#000); }
 .hero-copy { max-width: 980px; margin: 0 auto; padding: 235px 24px 0; text-align: center; }
