@@ -2,16 +2,28 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { GithubMark } from './github-mark'
 import { BUILT_AT, REPO_URL, SITE_NAME } from '@/lib/site'
 
 export function SiteHeader({ current }: { current: 'home' | 'demo' }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [contactOpen, setContactOpen] = useState(false)
+  const headerRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const closeMenus = (event: PointerEvent) => {
+      if (!headerRef.current?.contains(event.target as Node)) {
+        setMenuOpen(false)
+        setContactOpen(false)
+      }
+    }
+    document.addEventListener('pointerdown', closeMenus)
+    return () => document.removeEventListener('pointerdown', closeMenus)
+  }, [])
 
   return (
-    <header className={`bubble-header ${menuOpen ? 'is-open' : ''}`}>
+    <header ref={headerRef} className={`bubble-header ${menuOpen ? 'is-open' : ''}`}>
       <nav className="bubble-nav" aria-label="Site">
         <Link href="/" className="bubble-brand">
           <Image src="/resolvepr-shield.svg" alt="" width={31} height={31} priority />
