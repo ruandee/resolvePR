@@ -243,7 +243,7 @@
 .bubble-contact { grid-column: 3; justify-self: end; position: relative; }
 .contact-trigger { border: 1px solid rgba(255,255,255,.4); }
 .bubble-header.is-open .contact-trigger { border-color: rgba(0,0,0,.2); }
-.contact-menu { position: absolute; right: 0; top: 52px; width: 190px; padding: 8px; border: 1px solid rgba(255,255,255,.18); border-radius: 6px; background: #0b0b0b; color: #f4f4f4; box-shadow: 0 22px 50px rgba(0,0,0,.42); opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
+.contact-menu { position: absolute; right: 0; top: 44px; width: 190px; padding: 8px; border: 1px solid rgba(255,255,255,.18); border-radius: 6px; background: #0b0b0b; color: #f4f4f4; box-shadow: 0 22px 50px rgba(0,0,0,.42); opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
 .bubble-contact:hover .contact-menu, .bubble-contact:focus-within .contact-menu, .bubble-contact.is-open .contact-menu { opacity: 1; transform: none; pointer-events: auto; }
 .contact-menu a { display: flex; justify-content: space-between; padding: 13px 12px; border-radius: 4px; text-decoration: none; }
 .contact-menu a:hover { color: #78a2ff; background: rgba(91,140,255,.14); }
