@@ -19,11 +19,11 @@ const GH = {
   bgSubtle: '#161b22',
   text: '#e6edf3',
   muted: '#8b949e',
-  addBg: 'rgba(91,140,255,0.15)',
-  addGutter: 'rgba(91,140,255,0.3)',
+  addBg: 'rgba(46,160,67,0.15)',
+  addGutter: 'rgba(46,160,67,0.3)',
   delBg: 'rgba(248,81,73,0.15)',
   delGutter: 'rgba(248,81,73,0.3)',
-  action: '#5B8CFF',
+  green: '#238636',
   btn: '#21262d',
 }
 
@@ -94,7 +94,7 @@ export function GithubComment({ finding, before, compact = false, style }: Props
             </table>
           </div>
           <div style={{ display: 'flex', gap: 8, padding: `10px ${pad}px 12px`, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            <span aria-hidden style={{ ...button, background: GH.action, color: '#fff' }}>Commit suggestion</span>
+            <span aria-hidden style={{ ...button, background: GH.green, color: '#fff' }}>Commit suggestion</span>
             <span aria-hidden style={{ ...button, background: GH.btn, color: GH.text }}>Add suggestion to batch</span>
           </div>
         </div>

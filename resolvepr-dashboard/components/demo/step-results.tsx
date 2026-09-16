@@ -110,7 +110,7 @@ export function AuthorView({ fixture, findings, before }: { fixture: ScanFixture
           {fixture.pr.title} <span style={{ color: GH.muted, fontWeight: 400 }}>#{fixture.pr.number}</span>
         </h3>
         <p style={{ margin: '8px 0 0', fontSize: 13, color: GH.muted, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', background: TOKENS.accent, color: '#050505', fontSize: 12, fontWeight: 600 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', background: '#238636', color: '#fff', fontSize: 12, fontWeight: 600 }}>
             <GitPullRequest size={12} aria-hidden /> Open
           </span>
           <span style={{ fontFamily: TOKENS.fontMono }}>{fixture.pr.repo}</span> · {fixture.pr.files.length} files changed · <span style={{ fontFamily: TOKENS.fontMono }}>{fixture.pr.head_sha.slice(0, 7)}</span>

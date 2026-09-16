@@ -11,9 +11,7 @@ export default function DemoPage() {
   return (
     <>
       <SiteHeader current="demo" />
-      <div className="grain">
-        <Demo />
-      </div>
+      <Demo />
       <SiteFooter />
     </>
   )

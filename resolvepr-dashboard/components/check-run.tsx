@@ -12,7 +12,7 @@ interface Props {
   style?: CSSProperties
 }
 
-const GH = { bg: '#0d1117', bgSubtle: '#161b22', text: '#e6edf3', muted: '#8b949e', success: '#78a2ff', red: '#f85149' }
+const GH = { bg: '#0d1117', bgSubtle: '#161b22', text: '#e6edf3', muted: '#8b949e', green: '#3fb950', red: '#f85149' }
 
 /** Mock of the GitHub check run ResolvePR completes (summary from internal/output/checkrun.go). */
 export function CheckRun({ findings, stats, compact = false, style }: Props) {
@@ -24,13 +24,13 @@ export function CheckRun({ findings, stats, compact = false, style }: Props) {
   return (
     <section aria-label="Check run" style={{ background: GH.bg, color: GH.text, fontSize: compact ? 13 : 14, overflow: 'hidden', fontFamily: TOKENS.fontSans, ...style }}>
       <header style={{ display: 'flex', alignItems: 'center', gap: 10, padding: compact ? '10px 12px' : '12px 16px', background: GH.bgSubtle, flexWrap: 'wrap' }}>
-        {ok ? <CheckCircle2 size={18} color={GH.success} aria-hidden /> : <XCircle size={18} color={GH.red} aria-hidden />}
+        {ok ? <CheckCircle2 size={18} color={GH.green} aria-hidden /> : <XCircle size={18} color={GH.red} aria-hidden />}
         <span aria-hidden style={{ width: 20, height: 20, background: TOKENS.accent, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <ShieldCheck size={13} strokeWidth={2} color={TOKENS.bgBase} />
         </span>
         <strong style={{ fontWeight: 600 }}>ResolvePR</strong>
         <span style={{ color: GH.muted }}>— {checkTitle(findings)}</span>
-        <span style={{ marginLeft: 'auto', fontSize: 12, color: ok ? GH.success : GH.red, fontWeight: 600 }}>
+        <span style={{ marginLeft: 'auto', fontSize: 12, color: ok ? GH.green : GH.red, fontWeight: 600 }}>
           {ok ? 'Successful' : 'Failing'}{duration ? ` in ${duration}` : ''}
         </span>
       </header>
