@@ -12,6 +12,12 @@ export const ACTION_REF = 'ruandee/resolvepr@v1'
 /** Shown in the footer. */
 export const BUILT_AT = 'Built at GDG Hacks 2026 · Go · tree-sitter · Claude · Next.js'
 
+/** Contributor links shown in the footer. */
+export const CONTRIBUTORS = [
+  { name: 'Dee Ruan', href: 'https://www.linkedin.com/in/deeruan/' },
+  { name: 'Marcus Prgin', href: 'https://www.linkedin.com/in/marcus-prgin/' },
+]
+
 export const INSTALL_SNIPPET = `name: ResolvePR
 on: pull_request
 jobs:

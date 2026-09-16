@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ShieldCheck } from 'lucide-react'
 import { GithubMark } from './github-mark'
-import { BUILT_AT, REPO_URL, SITE_NAME } from '@/lib/site'
+import { BUILT_AT, CONTRIBUTORS, REPO_URL, SITE_NAME } from '@/lib/site'
 import { TOKENS } from '@/lib/tokens'
 
 export function SiteHeader({ current }: { current: 'home' | 'demo' }) {
@@ -38,6 +38,11 @@ export function SiteFooter() {
           <a href={REPO_URL} target="_blank" rel="noreferrer" style={{ color: TOKENS.textSecondary, textDecoration: 'none', minHeight: 40, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <GithubMark size={14} /> Repository
           </a>
+          {CONTRIBUTORS.map((c) => (
+            <a key={c.href} href={c.href} target="_blank" rel="noreferrer" style={{ color: TOKENS.textSecondary, textDecoration: 'none', minHeight: 40, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              {c.name} <span aria-hidden>↗</span>
+            </a>
+          ))}
         </div>
       </div>
     </footer>
